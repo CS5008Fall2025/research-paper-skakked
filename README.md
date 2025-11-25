@@ -9,11 +9,11 @@ Note the following is an example outline to help you. Please rework as you need,
 ## Introduction
 - What is the algorithm/datastructure?
 
-        > Cuckoo hashing is a hash table that generates O(1) worst-case lookup by giving each key two possible homes instead of one. 
+    - Cuckoo hashing is a hash table that generates O(1) worst-case lookup by giving each key two possible homes instead of one. 
 
-        > Unline traditional hash tables where collsions can create long chains or probe sequences, cuckoo hashing gurantees that any key can be found checking at most two locations.
+    - Unline traditional hash tables where collsions can create long chains or probe sequences, cuckoo hashing gurantees that any key can be found checking at most two locations.
 
-        > 
+    
 
 - What is the problem it solves? 
 - Provide a brief history of the algorithm/datastructure. (make sure to cite sources)
