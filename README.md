@@ -7,13 +7,12 @@
 Note the following is an example outline to help you. Please rework as you need, you do not need to follow the section heads and *YOU SHOULD NOT* make everything a bulleted list. This needs to read as an executive report/research paper. 
 
 ## Introduction
-- What is the algorithm/datastructure?
 
-    - Cuckoo hashing is a hash table that generates O(1) worst-case lookup by giving each key two possible homes instead of one. 
+Cuckoo hashing is a hash table that generates $O(1)$ worst-case lookup by giving each key two possible homes instead of one Unline traditional hash tables where collsions can create long chains or probe sequences, cuckoo hashing gurantees that any key can be found checking at most two locations. The name derives from the behavior of some species of cuckoo, where the cuckoo chick pushes the other eggs or young out of the nest when it hatches in a variation of the behavior referred to as brood parasitism; analogously, inserting a new key into a cuckoo hashing table may push an older key to a different location in the table[1].
 
-    - Unline traditional hash tables where collsions can create long chains or probe sequences, cuckoo hashing gurantees that any key can be found checking at most two locations.
+Cuckoo hashing was introduced by Rasmus Pagh and Flemming Friche Rodler in 2001 at the European Symposium on Algorithms, with the full paper published in the Journal of Algorithms in 2004 [1]. The authors developed this scheme to provide a practical dictionary with worst-case constant lookup time, matching the theoretical performance of dynamic perfect hashing [2] while being significantly simpler to implement. The original paper established key theoretical results including the requirement that load factor remain below approximately 50%, and that the expected number of displacements during insertion is constant. The work was recognized with the ESA Test-of-Time Award in 2020, acknowledging its significant impact on both theoretical computer science and practical systems design. Since its introduction, numerous variants have been developed, including d-ary cuckoo hashing which uses more than two hash functions to achieve higher load factors [3], and the recent "bubble-up" technique by Kuszmaul and Mitzenmacher which optimizes insertion performance [4].
 
-    - The name derives from the behavior of some species of cuckoo, where the cuckoo chick pushes the other eggs or young out of the nest when it hatches in a variation of the behavior referred to as brood parasitism; analogously, inserting a new key into a cuckoo hashing table may push an older key to a different location in the table.
+
 
 - What is the problem it solves? 
 - Provide a brief history of the algorithm/datastructure. (make sure to cite sources)
