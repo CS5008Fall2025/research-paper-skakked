@@ -1,10 +1,8 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/zBqi0PeJ)
 # Research Paper
-* Name:
-* Semester:
-* Topic:
-
-
+* Name: Siddharth Kakked
+* Semester: Fall 2025
+* Topic: Cuckoo Hashing: A Hash Table with Worst-Case Constant Lookup Time
 
 Note the following is an example outline to help you. Please rework as you need, you do not need to follow the section heads and *YOU SHOULD NOT* make everything a bulleted list. This needs to read as an executive report/research paper. 
 
