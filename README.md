@@ -20,7 +20,7 @@ This report provides a comprehensive analysis of cuckoo hashing. The following s
 ## Analysis of Algorithm/Datastructure
 
 **Overview**
-The cuckoo hashing data structure consists of two hash tables $T_1$ and $T_2$, each of size $m$, and two independent hash functions $h_1$ and $h_2$. Every key k is stored in exactly two locations.
+The cuckoo hashing data structure consists of two hash tables $T_1$ and $T_2$, each of size $m$, and two independent hash functions $h_1$ and $h_2$. Every key $k$ is stored in exactly two locations: $T_1[h_1(k)]$
 
 
 Make sure to include the following:
