@@ -27,6 +27,12 @@ At any given time, a stored key occupies one of these two positions. On insertio
 
 **Time Complexity**
 
+Let $n$ be the number of stored keys, and let $m$ be the capacity of each table, with load factor
+
+$$
+\alpha = \frac{n}{2m}.
+$$
+
 
 
 Make sure to include the following:
