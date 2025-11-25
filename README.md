@@ -25,6 +25,9 @@ The cuckoo hashing data structure consists of two hash tables $T_1$ and $T_2$, e
 
 At any given time, a stored key occupies one of these two positions. On insertion, if the target position is already occupied, cuckoo hashing evicts the existing key and moves it to its alternate position, possibly triggering a chain of evictions. If too many displacements occur, the table is rehashed with new hash functions. This design keeps lookups simple while still allowing high load factors.
 
+**Time Complexity**
+
+
 
 Make sure to include the following:
 - Time Complexity
