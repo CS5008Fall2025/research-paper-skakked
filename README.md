@@ -18,6 +18,9 @@ This report provides a comprehensive analysis of cuckoo hashing. The following s
 
 
 ## Analysis of Algorithm/Datastructure
+
+**Overview**
+The cuckoo hashing data structure consists of two hash tables $T_1$
 Make sure to include the following:
 - Time Complexity
 - Space Complexity
