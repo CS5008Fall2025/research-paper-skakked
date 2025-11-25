@@ -13,7 +13,7 @@ Note the following is an example outline to help you. Please rework as you need,
 
     - Unline traditional hash tables where collsions can create long chains or probe sequences, cuckoo hashing gurantees that any key can be found checking at most two locations.
 
-    
+    - The name derives from the behavior of some species of cuckoo, where the cuckoo chick pushes the other eggs or young out of the nest when it hatches in a variation of the behavior referred to as brood parasitism; analogously, inserting a new key into a cuckoo hashing table may push an older key to a different location in the table.
 
 - What is the problem it solves? 
 - Provide a brief history of the algorithm/datastructure. (make sure to cite sources)
