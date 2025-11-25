@@ -12,11 +12,9 @@ Cuckoo hashing is a hash table that generates $O(1)$ worst-case lookup by giving
 
 Cuckoo hashing was introduced by Rasmus Pagh and Flemming Friche Rodler in 2001 at the European Symposium on Algorithms, with the full paper published in the Journal of Algorithms in 2004 [1]. The authors developed this scheme to provide a practical dictionary with worst-case constant lookup time, matching the theoretical performance of dynamic perfect hashing [2] while being significantly simpler to implement. The original paper established key theoretical results including the requirement that load factor remain below approximately 50%, and that the expected number of displacements during insertion is constant. The work was recognized with the ESA Test-of-Time Award in 2020, acknowledging its significant impact on both theoretical computer science and practical systems design. Since its introduction, numerous variants have been developed, including d-ary cuckoo hashing which uses more than two hash functions to achieve higher load factors [3], and the recent "bubble-up" technique by Kuszmaul and Mitzenmacher which optimizes insertion performance [4].
 
+Traditional hash tables such as chaining and linear probing provide $O(1)$ average-case lookup time, but their worst-case performance can degrade to $O(n)$ when many keys collide. This unpredictability is problematic for real-time systems that cannot tolerate occasional slow operations, network routers that must process packets at line rate, and any application requiring bounded response times. Cuckoo hashing solves this problem by guaranteeing that lookup always takes constant time, regardless of the input distribution or collision patterns.
 
-
-- What is the problem it solves? 
-- Provide a brief history of the algorithm/datastructure. (make sure to cite sources)
-- Provide an introduction to the rest of the paper. 
+This report provides a comprehensive analysis of cuckoo hashing. The following section presents the theoretical analysis including time complexity, space complexity, and a proof of correctness. The empirical analysis section describes experimental methodology and benchmark results demonstrating the algorithm's practical performance. The application section discusses real-world use cases where cuckoo hashing excels. The implementation section details the C implementation including design decisions and challenges encountered. Finally, the summary reflects on key findings and lessons learned.
 
 
 ## Analysis of Algorithm/Datastructure
