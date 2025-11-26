@@ -30,9 +30,45 @@ At any given time, a stored key occupies one of these two positions. On insertio
 Let $n$ be the number of stored keys, and let $m$ be the capacity of each table, with load factor
 
 $$
-\alpha = \frac{n}{2m}.
+\alpha = \frac{n}{2m}
 $$
 
+- **Lookup**  
+  To determine whether a key $k$ is present, cuckoo hashing checks at most two locations:
+  $$
+  T_1[h_1(k)] \quad \text{and} \quad T_2[h_2(k)].
+  $$
+  This work is constant and does not depend on $n$.
+  $$
+  T_{\text{lookup}}(n) = O(1).
+  $$
+
+- **Deletion**  
+  Deletion uses the same locations as lookup. If the key is found in either candidate position, it is removed and the slot is marked empty.
+  $$
+  T_{\text{delete}}(n) = O(1).
+  $$
+
+- **Insertion**  
+  Insertion is more involved because of possible displacements. For a new key $k$, the algorithm:
+
+  1. Tries to place it at $T_1[h_1(k)]$.
+  2. If that slot is occupied, evicts the resident key and tries to insert that evicted key into its alternate table.
+  3. Repeats this process until an empty slot is found or a maximum number of displacements is reached.
+
+  Under typical load factors below a critical threshold $\alpha_c$, the **expected** number of displacements per insertion is constant, so
+
+  $$
+  \mathbb{E}\bigl[T_{\text{insert}}(n)\bigr] = O(1).
+  $$
+
+  In the **worst case**, however, the insertion can enter a cycle that prevents successful placement. When a cycle is detected (for example, after a fixed limit of displacement steps), the entire table is rebuilt with new hash functions. A rebuild touches all $n$ keys, so a single insertion can cost
+
+  $$
+  T_{\text{insert}}(n) = O(n)
+  $$
+
+  in the worst case. The key point is that such rebuilds are rare under the random hashing assumptions, so the amortized expected cost of insertion remains $O(1)$.
 
 
 Make sure to include the following:
