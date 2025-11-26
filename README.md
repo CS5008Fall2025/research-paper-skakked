@@ -17,7 +17,7 @@ Traditional hash tables such as chaining and linear probing provide $O(1)$ avera
 This report provides a comprehensive analysis of cuckoo hashing. The following section presents the theoretical analysis including time complexity, space complexity, and a proof of correctness. The empirical analysis section describes experimental methodology and benchmark results demonstrating the algorithm's practical performance. The application section discusses real-world use cases where cuckoo hashing excels. The implementation section details the C implementation including design decisions and challenges encountered. Finally, the summary reflects on key findings and lessons learned.
 
 
-## Analysis of Algorithm/Datastructure
+## Analysis of Datastructure
 
 **Overview**
 
@@ -80,7 +80,9 @@ $n \approx 2m\alpha \quad \Rightarrow \quad m \approx \frac{n}{2\alpha}$
 
 Since $\alpha$ is treated as a constant, this implies that space usage is $\text{Space}(n) = \Theta(m) = \Theta(n)$, which is linear in the number of stored keys. Cuckoo hashing does not require auxiliary pointer structures such as linked lists inside buckets, so there is relatively little overhead beyond the tables themselves.
 
-**General analysis of the algorithm/datastructure**
+**General analysis of the datastructure**
+
+
 
 ## Empirical Analysis
 - What is the empirical analysis?
