@@ -39,6 +39,7 @@ $\alpha = \frac{n}{2m}$
 
 - **Deletion**  
   Deletion uses the same locations as lookup. If the key is found in either candidate position, it is removed and the slot is marked empty.
+  
   $T_{\text{delete}}(n) = O(1)$
 
 - **Insertion**  
