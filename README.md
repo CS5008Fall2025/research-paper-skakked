@@ -29,11 +29,11 @@ At any given time, a stored key occupies one of these two positions. On insertio
 
 To analyze time complexity, let $n$ be the number of stored keys, and let $m$ be the capacity of each table so that the total number of slots is $2m$. The load factor is $\alpha = \frac{n}{2m}$.
 
-
 - **Lookup**  
   To determine whether a key $k$ is present, cuckoo hashing checks at most two locations:
-  $T_1[h_1(k)] \quad \text{and} \quad T_2[h_2(k)]$
+  $T_1[h_1(k)]$ and $T_2[h_2(k)]$
   This work is constant and does not depend on $n$.
+  
   $T_{\text{lookup}}(n) = O(1)$
 
 - **Deletion**  
