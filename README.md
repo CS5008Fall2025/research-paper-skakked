@@ -63,13 +63,13 @@ Under standard assumptions that $h_1$ and $h_2$ behave like independent random f
 
   in the worst case. The key point is that such rebuilds are rare under the random hashing assumptions, so the amortized expected cost of insertion remains $O(1)$.
 
-  **In Summary**
+  - **Summary**
 
-| Operation | Expected time      | Worst case time |
-|----------|--------------------|-----------------|
-| Lookup   | $O(1)$             | $O(1)$          |
-| Insert   | $O(1)$ amortized   | $O(n)$ (rehash) |
-| Delete   | $O(1)$             | $O(1)$          |
+        | Operation | Expected time      | Worst case time |
+        |----------|--------------------|-----------------|
+        | Lookup   | $O(1)$             | $O(1)$          |
+        | Insert   | $O(1)$ amortized   | $O(n)$ (rehash) |
+        | Delete   | $O(1)$             | $O(1)$          |
 
 
 **Space Complexity**
