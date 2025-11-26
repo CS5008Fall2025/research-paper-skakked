@@ -31,10 +31,13 @@ To analyze time complexity, let $n$ be the number of stored keys, and let $m$ be
 
 - **Lookup**  
   To determine whether a key $k$ is present, cuckoo hashing checks at most two locations:
-  $T_1[h_1(k)]$ and $T_2[h_2(k)]$
-  This work is constant and does not depend on $n$.
   
-  $T_{\text{lookup}}(n) = O(1)$
+  $T_1[h_1(k)]$ and $T_2[h_2(k)]$
+  
+  This work is constant and does not depend on $n$.
+
+  $T_{\text{lookup}}(n) = O(1)$ worst case
+  
 
 - **Deletion**  
   Deletion uses the same locations as lookup. If the key is found in either candidate position, it is removed and the slot is marked empty.
