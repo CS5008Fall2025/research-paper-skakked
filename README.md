@@ -29,6 +29,8 @@ At any given time, a stored key occupies one of these two positions. On insertio
 
 To analyze time complexity, let $n$ be the number of stored keys, and let $m$ be the capacity of each table so that the total number of slots is $2m$. The load factor is $\alpha = \frac{n}{2m}$.
 
+Under standard assumptions that $h_1$ and $h_2$ behave like independent random functions, the expected behavior is:
+
 - **Lookup**  
   To determine whether a key $k$ is present, cuckoo hashing checks at most two locations:
   
@@ -36,8 +38,8 @@ To analyze time complexity, let $n$ be the number of stored keys, and let $m$ be
   
   This work is constant and does not depend on $n$.
 
-  $T_{\text{lookup}}(n) = O(1)$ worst case
-  
+  $T_{\text{lookup}}(n) = O(1)$ (worst case)
+
 
 - **Deletion**  
   Deletion uses the same locations as lookup. If the key is found in either candidate position, it is removed and the slot is marked empty.
