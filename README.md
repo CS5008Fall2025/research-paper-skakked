@@ -30,7 +30,7 @@ At any given time, a stored key occupies one of these two positions. On insertio
 Let $n$ be the number of stored keys, and let $m$ be the capacity of each table, with load factor:
 
 
-- $\alpha = \frac{n}{2m}$ 
+$\alpha = \frac{n}{2m}$ 
 
 
 - **Lookup**  
