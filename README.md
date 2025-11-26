@@ -65,13 +65,11 @@ Under standard assumptions that $h_1$ and $h_2$ behave like independent random f
 
   **In Summary**
 
-  
-  | Operation | Expected time                       | Worst case time        |
-|----------|-------------------------------------|------------------------|
-| Lookup   | $O(1)$                              | $O(1)$                 |
-| Insert   | $O(1)$ amortized                    | $O(n)$ (rehash)        |
-| Delete   | $O(1)$                              | $O(1)$                 |
-
+| Operation | Expected time      | Worst case time |
+|----------|--------------------|-----------------|
+| Lookup   | $O(1)$             | $O(1)$          |
+| Insert   | $O(1)$ amortized   | $O(n)$ (rehash) |
+| Delete   | $O(1)$             | $O(1)$          |
 
 
 **Space Complexity**
