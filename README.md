@@ -78,9 +78,9 @@ Cuckoo hashing maintains two tables $𝑇_1$ and $𝑇_2$ of equal size $𝑚$. 
 
 $n \approx 2m\alpha \quad \Rightarrow \quad m \approx \frac{n}{2\alpha}$
 
-Since $\alpha$ is treated as a constant, this implies that space usage is
+Since $\alpha$ is treated as a constant, this implies that space usage is $\text{Space}(n) = \Theta(m) = \Theta(n)$, which is linear in the number of stored keys. Cuckoo hashing does not require auxiliary pointer structures such as linked lists inside buckets, so there is relatively little overhead beyond the tables themselves.
 
-- General analysis of the algorithm/datastructure
+**General analysis of the algorithm/datastructure**
 
 ## Empirical Analysis
 - What is the empirical analysis?
