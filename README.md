@@ -74,6 +74,9 @@ Under standard assumptions that $h_1$ and $h_2$ behave like independent random f
 
 **Space Complexity**
 
+Cuckoo hashing maintains two tables $𝑇_1$ and $𝑇_2$ of equal size $𝑚$. Each entry typically stores a key (and possibly an associated value) and a small amount of metadata, such as a flag indicating whether the slot is occupied. The total number of slots across both tables is $2m$. For a target load factor $alpha$
+
+
 - General analysis of the algorithm/datastructure
 
 ## Empirical Analysis
