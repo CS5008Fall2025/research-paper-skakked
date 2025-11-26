@@ -27,7 +27,7 @@ At any given time, a stored key occupies one of these two positions. On insertio
 
 **Time Complexity**
 
-Let $n$ be the number of stored keys, and let $m$ be the capacity of each table, with load factor
+Let $n$ be the number of stored keys, and let $m$ be the capacity of each table, with load factor:
 
 $\alpha = \frac{n}{2m}$
 
@@ -39,7 +39,7 @@ $\alpha = \frac{n}{2m}$
 
 - **Deletion**  
   Deletion uses the same locations as lookup. If the key is found in either candidate position, it is removed and the slot is marked empty.
-  
+
   $T_{\text{delete}}(n) = O(1)$
 
 - **Insertion**  
