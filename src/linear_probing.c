@@ -33,7 +33,7 @@ LinearHashMap* linear_create(size_t capacity) {
         return NULL;
     }
     
-    /* calloc sets all bytes to 0, so state = EMPTY (which is 0) */
+    // calloc sets all states to empty
     map->capacity = capacity;
     map->size = 0;
     return map;
@@ -60,7 +60,7 @@ bool linear_put(LinearHashMap *map, int key, int value) {
     size_t first_deleted = map->capacity;   /* Sentinel: no deleted found */
     
     do {
-        /* Case 1 : Empty Slot
+        /* Case 1 : Empty Slot */
         if (map->entries[idx].state == EMPTY) {
             if (first_deleted < map->capacity) {
                 idx = first_deleted;        /* Prefer deleted slot */
@@ -72,7 +72,7 @@ bool linear_put(LinearHashMap *map, int key, int value) {
             return true;
         }
         
-        /* Case 2: Deleted slot - remember for later */
+        /* Case 2: Deleted slot */
         if (map->entries[idx].state == DELETED && first_deleted == map->capacity) {
             first_deleted = idx;            /* Save first deleted position */
         }
@@ -105,7 +105,7 @@ bool linear_get(LinearHashMap *map, int key, int *value) {
     size_t start = idx;
     
     do {
-        /* Empty slot = key doesn't exist */
+        /* No key exists at this slot */
         if (map->entries[idx].state == EMPTY) {
             return false;                   /* Not found */
         }
