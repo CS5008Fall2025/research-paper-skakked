@@ -1,4 +1,4 @@
-// Makefile for Hash Table Implementations and Benchmarks 
+// Makefile for building and testing hash table implementations
 # Usage:
 #   make              - Build all executables
 #   make test         - Run all unit tests
@@ -10,39 +10,35 @@ CC = gcc
 CFLAGS = -Wall -Wextra -O2 -std=c99
 LDFLAGS = -lm
 
-# Executables
+# Source directory
+SRC = src
+
+# Executables (built in project root)
 TARGETS = test_cuckoo test_chained test_linear benchmark
 
-# Source files
-CUCKOO_SRC = cuckoo_hash.c
-CHAINED_SRC = chained_hash.c
-LINEAR_SRC = linear_probing.c
-
-.PHONY: all test bench csv clean test_all
+.PHONY: all test bench csv clean
 
 all: $(TARGETS)
 
 # === Test executables ===
 
-test_cuckoo: test_cuckoo.c $(CUCKOO_SRC) cuckoo_hash.h
-	$(CC) $(CFLAGS) -o $@ test_cuckoo.c $(CUCKOO_SRC) $(LDFLAGS)
+test_cuckoo: $(SRC)/test_cuckoo.c $(SRC)/cuckoo_hash.c $(SRC)/cuckoo_hash.h
+	$(CC) $(CFLAGS) -o $@ $(SRC)/test_cuckoo.c $(SRC)/cuckoo_hash.c $(LDFLAGS)
 
-test_chained: test_chained.c $(CHAINED_SRC) chained_hash.h
-	$(CC) $(CFLAGS) -o $@ test_chained.c $(CHAINED_SRC) $(LDFLAGS)
+test_chained: $(SRC)/test_chained.c $(SRC)/chained_hash.c $(SRC)/chained_hash.h
+	$(CC) $(CFLAGS) -o $@ $(SRC)/test_chained.c $(SRC)/chained_hash.c $(LDFLAGS)
 
-test_linear: test_linear.c $(LINEAR_SRC) linear_probing.h
-	$(CC) $(CFLAGS) -o $@ test_linear.c $(LINEAR_SRC) $(LDFLAGS)
+test_linear: $(SRC)/test_linear.c $(SRC)/linear_probing.c $(SRC)/linear_probing.h
+	$(CC) $(CFLAGS) -o $@ $(SRC)/test_linear.c $(SRC)/linear_probing.c $(LDFLAGS)
 
 # === Benchmark executable ===
 
-benchmark: benchmark.c $(CUCKOO_SRC) $(CHAINED_SRC) $(LINEAR_SRC)
-	$(CC) $(CFLAGS) -o $@ benchmark.c $(CUCKOO_SRC) $(CHAINED_SRC) $(LINEAR_SRC) $(LDFLAGS)
+benchmark: $(SRC)/benchmark.c $(SRC)/cuckoo_hash.c $(SRC)/chained_hash.c $(SRC)/linear_probing.c
+	$(CC) $(CFLAGS) -o $@ $(SRC)/benchmark.c $(SRC)/cuckoo_hash.c $(SRC)/chained_hash.c $(SRC)/linear_probing.c $(LDFLAGS)
 
 # === Run targets ===
 
-test: test_all
-
-test_all: test_cuckoo test_chained test_linear
+test: test_cuckoo test_chained test_linear
 	@echo ""
 	@echo "=========================================="
 	@echo "         RUNNING ALL UNIT TESTS"
@@ -68,7 +64,7 @@ csv: benchmark
 # === Cleanup ===
 
 clean:
-	rm -f $(TARGETS) *.o results.csv
+	rm -f $(TARGETS) results.csv
 
 # === Debug build ===
 
