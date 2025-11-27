@@ -8,8 +8,15 @@ DEBUG_FLAGS = -g -DDEBUG
 # Source directory
 SRC_DIR = src
 
-# Source and object files
-SRCS = $(SRC_DIR)/chained.c $(SRC_DIR)/linear_probing.c $(SRC_DIR)/cuckoo.c $(SRC_DIR)/test_hashmaps.c
+# Hash map implementation sources
+IMPL_SRCS = $(SRC_DIR)/chained.c $(SRC_DIR)/linear_probing.c $(SRC_DIR)/cuckoo.c
+
+# Test sources
+TEST_SRCS = $(SRC_DIR)/test_utils.c $(SRC_DIR)/test_correctness.c \
+            $(SRC_DIR)/test_benchmarks.c $(SRC_DIR)/test_main.c
+
+# All sources and objects
+SRCS = $(IMPL_SRCS) $(TEST_SRCS)
 OBJS = $(SRCS:.c=.o)
 TARGET = test_hashmaps
 
@@ -32,8 +39,16 @@ debug: clean all
 clean:
 	rm -f $(OBJS) $(TARGET)
 
-# Build and run
+# Build and run all tests
 run: $(TARGET)
 	./$(TARGET)
 
-.PHONY: all clean debug run
+# Run only correctness tests
+test: $(TARGET)
+	./$(TARGET) --correctness
+
+# Run only benchmarks
+bench: $(TARGET)
+	./$(TARGET) --benchmarks
+
+.PHONY: all clean debug run test bench
