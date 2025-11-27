@@ -1,4 +1,4 @@
- /**
+/*
  * Linear Probing Hash Map Implementation
  * Name: Siddharth Kakked
  * Semester: Fall 2025
@@ -7,184 +7,161 @@
 
 #include "linear_probing.h"
 #include <stdlib.h>
-#include <string.h>
 
-/* Simple hash function */
-static size_t hash(int key, size_t capacity) { // Jenkins' One-at-a-time hash
-    unsigned int h = (unsigned int)key; // Ensure non-negative
-    h ^= (h >> 16); 
-    h *= 0x85ebca6b;
-    h ^= (h >> 13);
-    h *= 0xc2b2ae35;
-    h ^= (h >> 16);
-    return h % capacity; // Modulo capacity
+// Hash function using MurmurHash-inspired bit mixing
+static size_t hash(int key, size_t capacity) {
+    unsigned int k = (unsigned int)key;
+    k ^= (k >> 16);      // Mix high bits down
+    k *= 0x85ebca6b;     // Multiply by magic constant
+    k ^= (k >> 13);      // More mixing
+    k *= 0xc2b2ae35;     // Another constant
+    k ^= (k >> 16);      // Final mix
+    return k % capacity; // Reduce to valid index
 }
 
-// Create a new linear probing hash map with given capacity
+// Create a new linear probing hash map
 LinearHashMap* linear_create(size_t capacity) {
-    if (capacity == 0) capacity = 16;       /* Default capacity */
-    
-    LinearHashMap *map = malloc(sizeof(LinearHashMap));  /* Allocate struct */
+    // Allocate main structure
+    LinearHashMap *map = malloc(sizeof(LinearHashMap));
     if (!map) return NULL;
     
-    map->entries = calloc(capacity, sizeof(LinearEntry)); /* Zeroed array */
+    // Allocate entry array
+    map->entries = calloc(capacity, sizeof(LinearEntry));
     if (!map->entries) {
         free(map);
         return NULL;
     }
     
-    // calloc sets all states to empty
+    // Initialize all slots as EMPTY
+    for (size_t i = 0; i < capacity; i++) {
+        map->entries[i].state = EMPTY;
+    }
+    
     map->capacity = capacity;
     map->size = 0;
     return map;
 }
 
+// Free all memory
 void linear_destroy(LinearHashMap *map) {
     if (!map) return;
-    free(map->entries);                     /* Free array */
-    free(map);                              /* Free struct */
+    free(map->entries);  // Free entry array
+    free(map);           // Free main struct
 }
 
 // Insert or update a key-value pair
 bool linear_put(LinearHashMap *map, int key, int value) {
-    if (!map) return false;
+    if (!map || map->size >= map->capacity) return false;  // Full or NULL
     
-    /* Reject if load factor > 70% */
-    if (map->size >= map->capacity * 7 / 10) {
-        return false;                       /* Would need resize */
-    }
-    
-    size_t idx = hash(key, map->capacity);  /* Starting position */
-    size_t start = idx;                     /* Remember start */
-    
-    size_t first_deleted = map->capacity;   /* Sentinel: no deleted found */
+    size_t idx = hash(key, map->capacity);  // Starting index
+    size_t start = idx;                      // Remember start to detect full loop
     
     do {
-        /* Case 1 : Empty Slot */
-        if (map->entries[idx].state == EMPTY) {
-            if (first_deleted < map->capacity) {
-                idx = first_deleted;        /* Prefer deleted slot */
-            }
+        // Found empty or deleted slot - insert here
+        if (map->entries[idx].state == EMPTY || 
+            map->entries[idx].state == DELETED) {
             map->entries[idx].key = key;
             map->entries[idx].value = value;
             map->entries[idx].state = OCCUPIED;
             map->size++;
             return true;
         }
-        
-        /* Case 2: Deleted slot */
-        if (map->entries[idx].state == DELETED && first_deleted == map->capacity) {
-            first_deleted = idx;            /* Save first deleted position */
+        // Found existing key - update value
+        if (map->entries[idx].state == OCCUPIED && 
+            map->entries[idx].key == key) {
+            map->entries[idx].value = value;
+            return true;  // No size change, just update
         }
-        
-        /* Case 3: Occupied with same key */
-        if (map->entries[idx].state == OCCUPIED && map->entries[idx].key == key) {
-            map->entries[idx].value = value; /* Update existing */
-            return true;
-        }
-        
-        idx = (idx + 1) % map->capacity;    /* Linear probe: next slot */
-    } while (idx != start);                 /* Full circle? */
+        // Linear probe: move to next slot
+        idx = (idx + 1) % map->capacity;
+    } while (idx != start);  // Stop if we've checked all slots
     
-    /* Table full but found a deleted slot */
-    if (first_deleted < map->capacity) {
-        map->entries[first_deleted].key = key;
-        map->entries[first_deleted].value = value;
-        map->entries[first_deleted].state = OCCUPIED;
-        map->size++;
-        return true;
-    }
-    
-    return false;                           /* Table completely full */
+    return false;  // Table is full
 }
 
+// Retrieve value for a key
 bool linear_get(LinearHashMap *map, int key, int *value) {
     if (!map) return false;
     
-    size_t idx = hash(key, map->capacity);  /* Starting position */
+    size_t idx = hash(key, map->capacity);  // Starting index
     size_t start = idx;
     
     do {
-        /* No key exists at this slot */
+        // EMPTY means key was never here
         if (map->entries[idx].state == EMPTY) {
-            return false;                   /* Not found */
+            return false;
         }
-        
-        /* Found the key */
-        if (map->entries[idx].state == OCCUPIED && map->entries[idx].key == key) {
+        // Check if this slot has our key
+        if (map->entries[idx].state == OCCUPIED && 
+            map->entries[idx].key == key) {
             if (value) *value = map->entries[idx].value;
-            return true;                    /* Success */
+            return true;
         }
-        
-        /* DELETED slots: keep probing (key might be past it) */
-        idx = (idx + 1) % map->capacity;    /* Next slot */
-    } while (idx != start);                 /* Full circle? */
+        // Continue probing (skip DELETED slots)
+        idx = (idx + 1) % map->capacity;
+    } while (idx != start);
     
-    return false;                           /* Not found */
+    return false;  // Not found
 }
 
-// Delete a key. Returns true if key existed.
+// Delete a key (mark as DELETED tombstone)
 bool linear_delete(LinearHashMap *map, int key) {
     if (!map) return false;
     
-    size_t idx = hash(key, map->capacity);  /* Starting position */
+    size_t idx = hash(key, map->capacity);
     size_t start = idx;
     
     do {
-        /* Empty slot = key doesn't exist */
+        // EMPTY means key was never here
         if (map->entries[idx].state == EMPTY) {
-            return false;                   /* Not found */
+            return false;
         }
-        
-        /* Found the key */
-        if (map->entries[idx].state == OCCUPIED && map->entries[idx].key == key) {
-            map->entries[idx].state = DELETED;  /* Mark as deleted (tombstone) */
+        // Found the key - mark as deleted
+        if (map->entries[idx].state == OCCUPIED && 
+            map->entries[idx].key == key) {
+            map->entries[idx].state = DELETED;  // Tombstone, not EMPTY
             map->size--;
             return true;
         }
-        
-        idx = (idx + 1) % map->capacity;    /* Next slot */
+        idx = (idx + 1) % map->capacity;
     } while (idx != start);
     
-    return false;                           /* Not found */
+    return false;  // Key not found
 }
 
+// Return number of stored elements
 size_t linear_size(LinearHashMap *map) {
     return map ? map->size : 0;
 }
 
+// Calculate total memory usage
 size_t linear_memory_usage(LinearHashMap *map) {
     if (!map) return 0;
-    
-    size_t mem = sizeof(LinearHashMap);             /* Struct itself */
-    mem += map->capacity * sizeof(LinearEntry);     /* Fixed-size array */
-    
-    return mem;                             /* Memory doesn't grow with size */
+    // Main struct + all entries (fixed size, no dynamic allocation per entry)
+    return sizeof(LinearHashMap) + map->capacity * sizeof(LinearEntry);
 }
 
-// Count probes needed to find or miss a key
+// Count probes needed to find or determine absence of key
 int linear_probe_count(LinearHashMap *map, int key) {
-    if (!map) return -1;
+    if (!map) return 0;
     
-    size_t idx = hash(key, map->capacity);  /* Starting position */
+    size_t idx = hash(key, map->capacity);
     size_t start = idx;
     int probes = 0;
     
     do {
-        probes++;                           /* Count this probe */
-        
-        /* Empty = end of probe sequence */
+        probes++;  // Count this probe
+        // EMPTY ends the search
         if (map->entries[idx].state == EMPTY) {
-            return probes;                  /* Probes until miss */
+            return probes;
         }
-        
-        /* Found the key */
-        if (map->entries[idx].state == OCCUPIED && map->entries[idx].key == key) {
-            return probes;                  /* Probes until hit */
+        // Found the key
+        if (map->entries[idx].state == OCCUPIED && 
+            map->entries[idx].key == key) {
+            return probes;
         }
-        
         idx = (idx + 1) % map->capacity;
     } while (idx != start);
     
-    return probes;                          /* Full table scan */
+    return probes;  // Searched entire table
 }
