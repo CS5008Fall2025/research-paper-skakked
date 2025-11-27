@@ -7,11 +7,12 @@
 
 #include "chained.h"
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
-// Hash function using MurmurHash-inspired bit mixing
 // Takes a key and capacity, returns bucket index
 static size_t hash(int key, size_t capacity) {
-    unsigned int k = (unsigned int)key;  // Convert to unsigned for bit ops
+    unsigned int k = (unsigned int)key;  // Convert to unsigned for bitwise ops
     k ^= (k >> 16);      // Mix high bits into low bits
     k *= 0x85ebca6b;     // Multiply by magic constant
     k ^= (k >> 13);      // More bit mixing
@@ -26,7 +27,7 @@ ChainedHashMap* chained_create(size_t capacity) {
     ChainedHashMap *map = malloc(sizeof(ChainedHashMap));
     if (!map) return NULL;  // Allocation failed
     
-    // Allocate array of bucket pointers, initialized to NULL
+    // Allocate the bucket array
     map->buckets = calloc(capacity, sizeof(ChainedNode*));
     if (!map->buckets) {
         free(map);  // Clean up on failure
@@ -56,7 +57,7 @@ void chained_destroy(ChainedHashMap *map) {
     free(map);           // Free the main structure
 }
 
-// Insert or update a key-value pair
+// Insert or update a key value pair
 bool chained_put(ChainedHashMap *map, int key, int value) {
     if (!map) return false;  // Handle NULL input
     
@@ -144,7 +145,7 @@ size_t chained_memory_usage(ChainedHashMap *map) {
     return mem;
 }
 
-// Find the length of the longest chain (for analysis)
+// Return the length of the longest chain in the hash map
 int chained_max_chain_length(ChainedHashMap *map) {
     if (!map) return 0;
     
