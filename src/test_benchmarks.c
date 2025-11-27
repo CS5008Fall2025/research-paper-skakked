@@ -240,3 +240,55 @@ void benchmark_scaling(void) {
     }
 }
 
+// Print benchmark results in formatted table
+static void print_benchmark_results(const char *operation, BenchmarkResult r) {
+    printf("Chained:        %.3f ms\n", r.chained_ms);
+    printf("Linear Probing: %.3f ms\n", r.linear_ms);
+    printf("Cuckoo:         %.3f ms", r.cuckoo_ms);
+    if (r.cuckoo_rehashes > 0) {
+        printf(" (rehashes: %d)", r.cuckoo_rehashes);
+    }
+    printf("\n");
+}
+
+// Run all benchmarks
+void run_all_benchmarks(int test_size, size_t capacity) {
+    BenchmarkResult r;
+    
+    // Random keys benchmarks
+    print_subsection("Random Keys");
+    int *random_keys = generate_random_keys(test_size);
+    
+    printf("\nINSERTION (%d elements):\n", test_size);
+    r = benchmark_insertion(random_keys, test_size, capacity);
+    print_benchmark_results("Insertion", r);
+    
+    printf("\nLOOKUP (%d lookups):\n", test_size);
+    r = benchmark_lookup(random_keys, test_size, capacity);
+    print_benchmark_results("Lookup", r);
+    
+    printf("\nDELETION (%d deletions):\n", test_size);
+    r = benchmark_deletion(random_keys, test_size, capacity);
+    print_benchmark_results("Deletion", r);
+    
+    free(random_keys);
+    
+    // Sequential keys benchmarks (reveals clustering issues)
+    print_subsection("Sequential Keys");
+    int *seq_keys = generate_sequential_keys(test_size);
+    
+    printf("\nINSERTION (%d elements):\n", test_size);
+    r = benchmark_insertion(seq_keys, test_size, capacity);
+    print_benchmark_results("Insertion", r);
+    
+    printf("\nLOOKUP (%d lookups):\n", test_size);
+    r = benchmark_lookup(seq_keys, test_size, capacity);
+    print_benchmark_results("Lookup", r);
+    
+    free(seq_keys);
+    
+    // Memory and worst-case analysis
+    benchmark_memory(test_size, capacity);
+    benchmark_worst_case_lookup(test_size, capacity);
+    benchmark_scaling();
+}
