@@ -101,3 +101,50 @@ BenchmarkResult benchmark_lookup(int *keys, int n, size_t capacity) {
     return result;
 }
 
+// Benchmark deletion performance
+BenchmarkResult benchmark_deletion(int *keys, int n, size_t capacity) {
+    BenchmarkResult result = {0, 0, 0, 0};
+    double start, end;
+    
+    // Build all tables first
+    ChainedHashMap *ch = chained_create(capacity);
+    LinearHashMap *lh = linear_create(capacity);
+    CuckooHashMap *cu = cuckoo_create(capacity);
+    
+    for (int i = 0; i < n; i++) {
+        chained_put(ch, keys[i], i);
+        linear_put(lh, keys[i], i);
+        cuckoo_put(cu, keys[i], i);
+    }
+    
+    // Benchmark Chained deletions
+    start = get_time_ms();
+    for (int i = 0; i < n; i++) {
+        chained_delete(ch, keys[i]);
+    }
+    end = get_time_ms();
+    result.chained_ms = end - start;
+    
+    // Benchmark Linear Probing deletions
+    start = get_time_ms();
+    for (int i = 0; i < n; i++) {
+        linear_delete(lh, keys[i]);
+    }
+    end = get_time_ms();
+    result.linear_ms = end - start;
+    
+    // Benchmark Cuckoo deletions
+    start = get_time_ms();
+    for (int i = 0; i < n; i++) {
+        cuckoo_delete(cu, keys[i]);
+    }
+    end = get_time_ms();
+    result.cuckoo_ms = end - start;
+    
+    chained_destroy(ch);
+    linear_destroy(lh);
+    cuckoo_destroy(cu);
+    
+    return result;
+}
+
