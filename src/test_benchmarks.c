@@ -148,3 +148,95 @@ BenchmarkResult benchmark_deletion(int *keys, int n, size_t capacity) {
     return result;
 }
 
+// Compare memory usage across implementations
+void benchmark_memory(int n, size_t capacity) {
+    print_section_header("MEMORY USAGE");
+    
+    int *keys = generate_random_keys(n);
+    
+    // Create and fill all maps
+    ChainedHashMap *ch = chained_create(capacity);
+    LinearHashMap *lh = linear_create(capacity);
+    CuckooHashMap *cu = cuckoo_create(capacity);
+    
+    for (int i = 0; i < n; i++) {
+        chained_put(ch, keys[i], i);
+        linear_put(lh, keys[i], i);
+        cuckoo_put(cu, keys[i], i);
+    }
+    
+    // Report memory usage and structure-specific metrics
+    printf("Elements stored: %d\n\n", n);
+    printf("Chained:        %zu bytes (max chain: %d)\n", 
+           chained_memory_usage(ch), chained_max_chain_length(ch));
+    printf("Linear Probing: %zu bytes\n", 
+           linear_memory_usage(lh));
+    printf("Cuckoo:         %zu bytes (load: %.2f%%)\n", 
+           cuckoo_memory_usage(cu), cuckoo_load_factor(cu) * 100);
+    
+    chained_destroy(ch);
+    linear_destroy(lh);
+    cuckoo_destroy(cu);
+    free(keys);
+}
+
+// Analyze worst-case lookup behavior
+void benchmark_worst_case_lookup(int n, size_t capacity) {
+    print_section_header("WORST-CASE LOOKUP ANALYSIS");
+    
+    int *keys = generate_random_keys(n);
+    
+    // Create and fill all maps
+    ChainedHashMap *ch = chained_create(capacity);
+    LinearHashMap *lh = linear_create(capacity);
+    CuckooHashMap *cu = cuckoo_create(capacity);
+    
+    for (int i = 0; i < n; i++) {
+        chained_put(ch, keys[i], i);
+        linear_put(lh, keys[i], i);
+        cuckoo_put(cu, keys[i], i);
+    }
+    
+    // Find worst-case probes for linear probing
+    int max_probes = 0;
+    for (int i = 0; i < n; i++) {
+        int probes = linear_probe_count(lh, keys[i]);
+        if (probes > max_probes) max_probes = probes;
+    }
+    
+    // Report worst-case metrics
+    printf("Chained max chain length:  %d\n", chained_max_chain_length(ch));
+    printf("Linear probing max probes: %d\n", max_probes);
+    printf("Cuckoo max lookups:        2 (guaranteed)\n");
+    
+    chained_destroy(ch);
+    linear_destroy(lh);
+    cuckoo_destroy(cu);
+    free(keys);
+}
+
+// Test scaling behavior with increasing sizes
+void benchmark_scaling(void) {
+    print_section_header("SCALING ANALYSIS");
+    
+    int sizes[] = {1000, 5000, 10000, 50000, 100000};
+    int num_sizes = sizeof(sizes) / sizeof(sizes[0]);
+    
+    printf("%-10s | %-12s | %-12s | %-12s\n", 
+           "Size", "Chained", "Linear", "Cuckoo");
+    printf("-----------|--------------|--------------|-------------\n");
+    
+    for (int s = 0; s < num_sizes; s++) {
+        int n = sizes[s];
+        size_t capacity = n * 2;
+        int *keys = generate_random_keys(n);
+        
+        BenchmarkResult r = benchmark_insertion(keys, n, capacity);
+        
+        printf("%-10d | %10.3f ms | %10.3f ms | %10.3f ms\n",
+               n, r.chained_ms, r.linear_ms, r.cuckoo_ms);
+        
+        free(keys);
+    }
+}
+
