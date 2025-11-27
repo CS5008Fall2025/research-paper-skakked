@@ -1,8 +1,8 @@
 /*
+ * Cookoo Hash Map with Chaining Collision Resolution 
  * Name: Siddharth Kakked
  * Semester: Fall 2025
  * Class: CS 5008
- * Cookoo Hash Map with Chaining Collision Resolution
  */
 
 #ifndef CHAINED_H

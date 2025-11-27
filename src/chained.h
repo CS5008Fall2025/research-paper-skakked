@@ -1,5 +1,8 @@
 /*
-* Chained Hash Map Header
+ * Chained Hash Map Header
+ * Name: Siddharth Kakked
+ * Semester: Fall 2025
+ * Class: CS 5008
 */
 
 #ifndef CHAINED_H
