@@ -241,7 +241,7 @@ void benchmark_scaling(void) {
 }
 
 // Print benchmark results in formatted table
-static void print_benchmark_results(const char *operation, BenchmarkResult r) {
+static void print_benchmark_results(BenchmarkResult r) {
     printf("Chained:        %.3f ms\n", r.chained_ms);
     printf("Linear Probing: %.3f ms\n", r.linear_ms);
     printf("Cuckoo:         %.3f ms", r.cuckoo_ms);
@@ -261,15 +261,15 @@ void run_all_benchmarks(int test_size, size_t capacity) {
     
     printf("\nINSERTION (%d elements):\n", test_size);
     r = benchmark_insertion(random_keys, test_size, capacity);
-    print_benchmark_results("Insertion", r);
+    print_benchmark_results(r);
     
     printf("\nLOOKUP (%d lookups):\n", test_size);
     r = benchmark_lookup(random_keys, test_size, capacity);
-    print_benchmark_results("Lookup", r);
+    print_benchmark_results(r);
     
     printf("\nDELETION (%d deletions):\n", test_size);
     r = benchmark_deletion(random_keys, test_size, capacity);
-    print_benchmark_results("Deletion", r);
+    print_benchmark_results(r);
     
     free(random_keys);
     
@@ -279,11 +279,11 @@ void run_all_benchmarks(int test_size, size_t capacity) {
     
     printf("\nINSERTION (%d elements):\n", test_size);
     r = benchmark_insertion(seq_keys, test_size, capacity);
-    print_benchmark_results("Insertion", r);
+    print_benchmark_results(r);
     
     printf("\nLOOKUP (%d lookups):\n", test_size);
     r = benchmark_lookup(seq_keys, test_size, capacity);
-    print_benchmark_results("Lookup", r);
+    print_benchmark_results(r);
     
     free(seq_keys);
     
