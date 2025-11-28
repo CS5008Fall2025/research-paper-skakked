@@ -97,7 +97,7 @@ To evaluate how each hash table behaves as the problem size grows, a scaling exp
 *Figure 1. Scaling behavior of chained hashing, linear probing, and cuckoo hashing at roughly 50% load factor.*
 ![Scaling behavior of hash map inerstions](https://github.com/CS5008Fall2025/research-paper-skakked/blob/main/graphs/scaling_plot.png)
 
-
+Across all tested sizes, linear probing achieves the lowest insertion time, with chained hashing consistently slower and cuckoo hashing the most expensive, especially beyond about $𝑛=25000$. This reflects the extra work cuckoo hashing performs during insertions (displacements and occasional rehashes), even though it offers the strongest worst case guarantees for lookup.
 
 ## Application
 - What is the algorithm/datastructure used for?
