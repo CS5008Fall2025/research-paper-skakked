@@ -87,8 +87,9 @@ Cuckoo hashing keeps its core operations simple while using a displacement chain
 
 
 ## Empirical Analysis
-- What is the empirical analysis?
-- Provide specific examples / data.
+
+To evaluate the cookoo hashing I implemented three different hash tables in C that all store 32 bit integer keys and values. Cuckoo hashing (two tables, two hash functions, displacement and rehash) is compared against two simpler and widely used collision resolution strategies: separate chaining (one table with linked lists in each bucket) and linear probing (open addressing with tombstones). For each structure, I fixed the load factor to 50% by choosing the capacity to be roughly twice the number of elements, and then measure insertion, lookup, and deletion time as the table size grows.
+
 
 
 ## Application

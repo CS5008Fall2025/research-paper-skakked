@@ -219,7 +219,7 @@ void benchmark_worst_case_lookup(int n, size_t capacity) {
 void benchmark_scaling(void) {
     print_section_header("SCALING ANALYSIS");
     
-    int sizes[] = {1000, 5000, 10000, 50000, 100000};
+    int sizes[] = {1000, 5000, 10000, 25000, 50000, 75000, 100000, 125000, 150000, 175000, 200000};
     int num_sizes = sizeof(sizes) / sizeof(sizes[0]);
     
     printf("%-10s | %-12s | %-12s | %-12s\n", 
