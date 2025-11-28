@@ -92,6 +92,11 @@ To evaluate the cookoo hashing I implemented three different hash tables in C th
 
 
 
+**Scaling**
+
+
+
+
 ## Application
 - What is the algorithm/datastructure used for?
 - Provide specific examples
