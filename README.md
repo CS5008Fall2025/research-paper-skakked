@@ -96,7 +96,7 @@ To evaluate the cookoo hashing I implemented three different hash tables in C th
 
 To test this hypothesis, a worst case experiment was conducted that measures the maximum work required by each implementation to answer successful lookups. For each size $n \in$ {1000, 5000, 10000, 50000, 100000} the three hash tables (chained hashing, linear probing, and cuckoo hashing) were constructed and populated with $n$ uniformly generated 32 bit integer keys at an approximate load factor of $50\%$ by choosing the capacity to be about $2n$. The benchmark then scanned all keys and recorded three metrics: the maximum chain length observed in any bucket of the chained table, the maximum number of probes required by the linear probing table to locate a key, and the maximum number of locations inspected by the cuckoo table. Table 1 summarizes these worst case statistics.
 
-*Table 1. Empirical worst case lookup behavior at roughly $50\%$ load factor.*
+*Table 1. Empirical worst case lookup behavior at roughly 50\% load factor.*
 
 | Elements ($n$) | Chained: max chain length | Linear probing: max probes | Cuckoo: max lookups |
 |---------------:|---------------------------|----------------------------|----------------------|
