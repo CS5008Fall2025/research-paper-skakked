@@ -140,11 +140,196 @@ Across all tested sizes, lookup time grows very slowly with $n$, consistent with
 
 
 ## Implementation
-- What language did you use?
-- What libraries did you use?
-- What were the challenges you faced?
-- Provide key points of the algorithm/datastructure implementation, discuss the code.
-- If you found code in another language, and then implemented in your own language that is fine - but make sure to document that.
+
+### Language and Environment
+
+The cuckoo hash map is implemented in C using the C99 standard and compiled with GCC using the flags `-Wall -Wextra -std=c99 -O2`. C was chosen to provide direct control over memory layout and allocation, which fits the low level nature of hash table design and performance benchmarking. The implementation does not depend on any third party libraries. It uses only the C standard library headers `stdlib.h`, `string.h`, `time.h`, and `stdbool.h` for memory management, string operations, timing, and Boolean types.
+
+### Project Structure
+
+The codebase is organized into modular components so that each collision resolution strategy can be tested behind a common interface:
+
+```text
+src/
+├── cuckoo.h / cuckoo.c                 # Cuckoo hash map implementation
+├── chained.h / chained.c               # Chained hash map (comparison)
+├── linear_probing.h / linear_probing.c # Linear probing (comparison)
+├── test_utils.h / test_utils.c         # Timing and key generation helpers
+├── test_correctness.h / test_correctness.c   # Unit tests for all maps
+├── test_benchmarks.h / test_benchmarks.c     # Performance benchmarks
+└── test_main.c                         # Entry point with CLI parsing
+```
+
+The `test_main.c` file provides a simple command line interface that lets the user choose which implementation to run, which experiment to execute, and how many elements to insert. The shared test harness ensures that chained hashing, linear probing, and cuckoo hashing all see identical workloads and capacity choices.
+
+### Core Data Structures
+
+The cuckoo hash map maintains two separate tables that use independent hash functions:
+
+```c
+typedef struct {
+    int key;
+    int value;
+    bool occupied;
+} CuckooEntry;
+
+typedef struct {
+    CuckooEntry *table1;   // First hash table
+    CuckooEntry *table2;   // Second hash table
+    size_t capacity;       // Capacity of EACH table
+    size_t size;           // Total elements across both tables
+    unsigned int seed1;    // Seed for first hash function
+    unsigned int seed2;    // Seed for second hash function
+    int rehash_count;      // Number of rehashes performed
+} CuckooHashMap;
+```
+
+Each `CuckooEntry` stores a single `(key, value)` pair along with an `occupied` flag that tracks whether the slot is in use. The map struct holds pointers to both tables, a shared capacity value (each table has the same length), the current element count, and seeds that parameterize the two hash functions. The `rehash_count` field records how many times the structure has been rebuilt due to insertion cycles.
+
+### Key Implementation Details
+
+#### Hash Function Design
+
+Cuckoo hashing relies on having two independent hash functions so that each key has two candidate homes. The implementation uses a MurmurHash inspired mixing function parameterized by a seed:
+
+```c
+static size_t hash_with_seed(int key, unsigned int seed, size_t capacity) {
+    unsigned int k = (unsigned int)key;
+    k ^= seed;           // Mix in the seed for independence
+    k ^= (k >> 16);      // Bit mixing
+    k *= 0x85ebca6b;     // Magic constant from MurmurHash3
+    k ^= (k >> 13);
+    k *= 0xc2b2ae35;
+    k ^= (k >> 16);
+    return k % capacity;
+}
+```
+
+Two hash wrappers `h1` and `h2` call this helper with `seed1` and `seed2` respectively. Seeds are initialized when the map is created and regenerated on every rehash so that problematic configurations get new hash functions. Using a proper mixing function avoids clustering, especially for sequential integer keys, and makes the empirical results more representative of textbook cuckoo hashing.
+
+#### Insertion with Displacement Chain
+
+Insertion is the most complex operation. It implements the characteristic cuckoo displacement process that alternates between the two tables:
+
+```c
+bool cuckoo_insert_internal(CuckooHashMap *map, int key, int value, bool count_size) {
+    int cur_key = key;
+    int cur_value = value;
+    int use_table1 = 1;
+
+    for (int i = 0; i < MAX_DISPLACEMENTS; i++) {
+        if (use_table1) {
+            size_t idx = h1(map, cur_key);
+            if (!map->table1[idx].occupied) {
+                // Empty slot found - success
+                map->table1[idx].key = cur_key;
+                map->table1[idx].value = cur_value;
+                map->table1[idx].occupied = true;
+                if (count_size) {
+                    map->size++;
+                }
+                return true;
+            }
+            // Evict current resident
+            int evicted_key = map->table1[idx].key;
+            int evicted_value = map->table1[idx].value;
+            map->table1[idx].key = cur_key;
+            map->table1[idx].value = cur_value;
+            cur_key = evicted_key;
+            cur_value = evicted_value;
+            use_table1 = 0;  // Try table2 next
+        } else {
+            size_t idx = h2(map, cur_key);
+            if (!map->table2[idx].occupied) {
+                // Empty slot found - success
+                map->table2[idx].key = cur_key;
+                map->table2[idx].value = cur_value;
+                map->table2[idx].occupied = true;
+                if (count_size) {
+                    map->size++;
+                }
+                return true;
+            }
+            // Evict current resident
+            int evicted_key = map->table2[idx].key;
+            int evicted_value = map->table2[idx].value;
+            map->table2[idx].key = cur_key;
+            map->table2[idx].value = cur_value;
+            cur_key = evicted_key;
+            cur_value = evicted_value;
+            use_table1 = 1;  // Bounce back to table1
+        }
+    }
+
+    // If control reaches here, we probably have a cycle
+    return false;
+}
+```
+
+On each step the algorithm chooses a table, computes the corresponding index, and either places the key into an empty slot or evicts the existing resident and continues with that evicted key. The `MAX_DISPLACEMENTS` constant (set to 500) bounds the length of the displacement chain. If this limit is reached the insertion is treated as failed and a rehash is triggered.
+
+Lookup and deletion are straightforward in comparison. Both operations compute `h1` and `h2` for the key and inspect at most two positions. Deletion simply clears the `occupied` flag for any matching entry and decrements `size`.
+
+#### Rehashing Strategy
+
+When a cycle is detected the map regenerates its hash function seeds and reinserts all elements into freshly allocated tables. The rehash logic looks like this:
+
+```c
+static bool cuckoo_rehash(CuckooHashMap *map) {
+    size_t old_capacity = map->capacity;
+    CuckooEntry *old_table1 = map->table1;
+    CuckooEntry *old_table2 = map->table2;
+
+    // Allocate fresh tables with the same capacity
+    map->table1 = calloc(old_capacity, sizeof(CuckooEntry));
+    map->table2 = calloc(old_capacity, sizeof(CuckooEntry));
+    if (!map->table1 || !map->table2) {
+        // Allocation failed, restore old tables and signal error
+        free(map->table1);
+        free(map->table2);
+        map->table1 = old_table1;
+        map->table2 = old_table2;
+        return false;
+    }
+
+    // Generate new hash function seeds
+    init_seeds(map);
+    map->size = 0;
+    map->rehash_count++;
+
+    // Reinsert all entries with new hash functions
+    for (size_t i = 0; i < old_capacity; i++) {
+        if (old_table1[i].occupied) {
+            cuckoo_insert_internal(map,
+                                   old_table1[i].key,
+                                   old_table1[i].value,
+                                   true);
+        }
+        if (old_table2[i].occupied) {
+            cuckoo_insert_internal(map,
+                                   old_table2[i].key,
+                                   old_table2[i].value,
+                                   true);
+        }
+    }
+
+    free(old_table1);
+    free(old_table2);
+    return true;
+}
+```
+
+Rehashing keeps the same capacity in this implementation because the experiments already control load factor separately. In a production setting the rehash could also grow the table when the load factor becomes too high.
+
+### Implementation Challenges
+
+Several aspects of the implementation required careful attention:
+
+* **Managing two tables and hash seeds:** Keeping `table1`, `table2`, `seed1`, and `seed2` in sync across insertions, deletions, and rehashes is easy to get wrong. Small mistakes in index calculations or seed initialization tend to show up as hard to debug missing keys.
+* **Choosing `MAX_DISPLACEMENTS`:** There is a trade off between allowing enough displacements to resolve most insertions without rehashing and avoiding long cycles that hurt latency. The value 500 worked well in practice for the tested sizes and load factors.
+* **Memory management:** Rehashing allocates new tables and must correctly free the old ones after all entries have been moved. The code needs to handle allocation failures gracefully and avoid memory leaks when rehashing or destroying the map.
+* **Fair benchmarking:** To compare chained hashing, linear probing, and cuckoo hashing fairly, the test harness had to ensure that all implementations used the same hash function family, capacities, and workloads. Encapsulating timing and key generation in `test_utils.c` helped keep these details consistent across experiments.
+
 
 
 ## Summary
