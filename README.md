@@ -110,6 +110,8 @@ Across the tested sizes, the worst case cost for separate chaining and linear pr
 
 **Experiment 2: Scaling behavior of hashmap insertions**
 
+*Hypothesis.* At a fixed load factor of approximately $50\%$, the total insertion time will grow approximately linearly with $n$ for all three hash tables, reflecting $O(1)$ expected cost per insertion, with linear probing exhibiting the smallest constant factor, separate chaining intermediate, and cuckoo hashing the largest due to displacement chains and occasional rehashing.
+
 To evaluate how each hash table behaves as the problem size grows, a scaling experiment was conducted that measures the total insertion time as a function of the number of elements. For each size (1000, 5000, 10000, 25000, 50000, 75000, 100000), the three implementations (chained hashing, linear probing, and cuckoo hashing) were constructed and populated with $n$ uniformly generated 32 bit integer keys while maintaining a load factor of approximately $50\%$ by choosing the capacity to be about $2n$. Figure 1 plots insertion time in milliseconds against the number of elements on a logarithmic $x$ axis, with separate curves for each collision resolution strategy. This scaling test provides a direct visual comparison of how the constant factors and growth behavior of the three designs differ as tables move from small toy sizes to more realistic workloads.
 
 *Figure 1. Scaling behavior of chained hashing, linear probing, and cuckoo hashing at roughly 50% load factor.*
@@ -118,6 +120,8 @@ To evaluate how each hash table behaves as the problem size grows, a scaling exp
 Across all tested sizes, linear probing achieves the lowest insertion time, with chained hashing consistently slower and cuckoo hashing the most expensive, especially beyond about $𝑛=25000$. This reflects the extra work cuckoo hashing performs during insertions (displacements and occasional rehashes), even though it offers the strongest worst case guarantees for lookup.
 
 **Experiment 3: Lookup Performance**
+
+*Hypothesis.* At a fixed load factor of approximately $50\%$, the total time for $n$ successful lookups will grow very slowly with $n$ for all three hash tables, consistent with $O(1)$ average cost per lookup, and cuckoo hashing will achieve equal or lower lookup latency than separate chaining and linear probing because each query inspects at most two candidate locations.
 
 To evaluate lookup performance under the same conditions as the insertion experiment, a second experiment was conducted that measures the total time required to perform successful lookups on tables of increasing size. For each size $n \in${1000, 5000, 10000, 25000, 50000, 75000, 100000}, the three implementations (chained hashing, linear probing, and cuckoo hashing) were first constructed and populated with $n$ uniformly generated 32 bit integer keys at an approximate load factor of $50%$ by setting the capacity to about $2n$. The benchmark then issued $n$ successful lookup queries using the same key set and recorded the total time spent in lookup operations. Figure 2 plots lookup time in milliseconds against the number of elements on a logarithmic $x$ axis, with separate curves for each collision resolution strategy.
 
