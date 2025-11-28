@@ -90,7 +90,9 @@ Cuckoo hashing keeps its core operations simple while using a displacement chain
 
 To evaluate the cookoo hashing I implemented three different hash tables in C that all store 32 bit integer keys and values. Cuckoo hashing (two tables, two hash functions, displacement and rehash) is compared against two simpler and widely used collision resolution strategies: separate chaining (one table with linked lists in each bucket) and linear probing (open addressing with tombstones). For each structure, I fixed the load factor to 50% by choosing the capacity to be roughly twice the number of elements, and then measure insertion, lookup, and deletion time as the table size grows.
 
-**Scaling**
+**Experiment 1: Scaling**
+
+To evaluate how each hash table behaves as the problem size grows, a scaling experiment was conducted that measures the total insertion time as a function of the number of elements. For each size $\(n \in \{1\,000, 5\,000, 10\,000, 25\,000, 50\,000, 75\,000, 100\,000\}\)$, the three implementations (chained hashing, linear probing, and cuckoo hashing) were constructed and populated with \(n\) uniformly generated 32 bit integer keys while maintaining a load factor of approximately $(50\%\)$ by choosing the capacity to be about $\(2n\)$. Figure 1 plots insertion time in milliseconds against the number of elements on a logarithmic $\(x\)$-axis, with separate curves for each collision resolution strategy. This scaling test provides a direct visual comparison of how the constant factors and growth behavior of the three designs differ as tables move from small toy sizes to more realistic workloads.
 
 *Figure 1. Scaling behavior of chained hashing, linear probing, and cuckoo hashing at roughly 50% load factor.*
 ![Scaling behavior of hash map inerstions](https://github.com/CS5008Fall2025/research-paper-skakked/blob/main/graphs/scaling_plot.png)
