@@ -90,7 +90,7 @@ Cuckoo hashing keeps its core operations simple while using a displacement chain
 
 To evaluate the cookoo hashing I implemented three different hash tables in C that all store 32 bit integer keys and values. Cuckoo hashing (two tables, two hash functions, displacement and rehash) is compared against two simpler and widely used collision resolution strategies: separate chaining (one table with linked lists in each bucket) and linear probing (open addressing with tombstones). For each structure, I fixed the load factor to 50% by choosing the capacity to be roughly twice the number of elements, and then measure insertion, lookup, and deletion time as the table size grows.
 
-**Experiment 1: Scaling**
+**Experiment 1: Scaling behavior of hashmap insertions**
 
 To evaluate how each hash table behaves as the problem size grows, a scaling experiment was conducted that measures the total insertion time as a function of the number of elements. For each size (1000, 5000, 10000, 25000, 50000, 75000, 100000), the three implementations (chained hashing, linear probing, and cuckoo hashing) were constructed and populated with $n$ uniformly generated 32 bit integer keys while maintaining a load factor of approximately $50\%$ by choosing the capacity to be about $2n$. Figure 1 plots insertion time in milliseconds against the number of elements on a logarithmic $x$ axis, with separate curves for each collision resolution strategy. This scaling test provides a direct visual comparison of how the constant factors and growth behavior of the three designs differ as tables move from small toy sizes to more realistic workloads.
 
@@ -98,6 +98,16 @@ To evaluate how each hash table behaves as the problem size grows, a scaling exp
 ![Scaling behavior of hash map inerstions](https://github.com/CS5008Fall2025/research-paper-skakked/blob/main/graphs/scaling_plot.png)
 
 Across all tested sizes, linear probing achieves the lowest insertion time, with chained hashing consistently slower and cuckoo hashing the most expensive, especially beyond about $𝑛=25000$. This reflects the extra work cuckoo hashing performs during insertions (displacements and occasional rehashes), even though it offers the strongest worst case guarantees for lookup.
+
+**Experiment 2: Lookup Performance**
+
+To evaluate lookup performance under the same conditions as the insertion experiment, a second experiment was conducted that measures the total time required to perform successful lookups on tables of increasing size. For each size $n \in {1000, 5000, 10000, 25000, 50000, 75000, 100000}$, the three implementations (chained hashing, linear probing, and cuckoo hashing) were first constructed and populated with $n$ uniformly generated 32 bit integer keys at an approximate load factor of $50%$ by setting the capacity to about $2n$. The benchmark then issued $n$ successful lookup queries using the same key set and recorded the total time spent in lookup operations. Figure 2 plots lookup time in milliseconds against the number of elements on a logarithmic $x$ axis, with separate curves for each collision resolution strategy.
+
+Figure 2. Lookup performance of chained hashing, linear probing, and cuckoo hashing at roughly 50% load factor.
+
+
+Across all tested sizes, lookup time grows very slowly with $n$, consistent with the expected $O(1)$ average behavior at a fixed load factor, but the relative ordering of the three schemes changes with scale. At small to medium sizes cuckoo hashing is at least competitive and often best; for example, at $n = 1000$ both chained and cuckoo complete all lookups in about $0.006$ ms compared with $0.008$ ms for linear probing, and at $n = 25000$ cuckoo takes $0.144$ ms versus $0.174$ ms for chained and $0.197$ ms for linear probing. At larger sizes, however, linear probing becomes the fastest: at $n = 100000$ and $50%$ load it achieves $1.529$ ms for $n$ successful lookups compared with $1.613$ ms for chained hashing and $1.846$ ms for cuckoo hashing, roughly a $17%$ improvement over cuckoo. These results show that all three designs deliver constant time lookups in practice at fixed load, with cuckoo hashing slightly favored at smaller scales and linear probing offering the best lookup throughput once tables become large in this implementation.
+
 
 ## Application
 - What is the algorithm/datastructure used for?
