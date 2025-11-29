@@ -133,10 +133,28 @@ Across all tested sizes, lookup time grows very slowly with $n$, consistent with
 
 
 ## Application
-- What is the algorithm/datastructure used for?
-- Provide specific examples
-- Why is it useful / used in that field area?
-- Make sure to provide sources for your information.
+
+Cuckoo hashing is used in systems that require predictable, low latency hash table lookups rather than only good average case behavior. Its two position lookup and bounded probe pattern make it valuable across several domains.
+
+### Network Packet Processing 
+
+Cuckoo hashing is widely used in software routers and middleboxes to implement fast dictionaries for flow tables, NAT mappings, access control lists, and other per flow state. Frameworks like Intel’s Data Plane Development Kit (DPDK) provide high performance cuckoo hash tables, and systems such as CuckooSwitch build Ethernet forwarding tables on top of DPDK’s hash library to process packets at line rate. This is valuable because routers and switches must sustain millions of lookups per second, and a single slow lookup can cause packet drops or buffer buildup, so cuckoo hashing’s small, bounded number of probes helps keep latency stable and throughput high.
+
+### In Memory Caches and Key Value Stores
+
+In memory caches and key value stores use cuckoo hashing for their index structures when workloads are read heavy and low latency is critical. MemC3, a Memcached variant from Carnegie Mellon, is a prominent example that adopts “optimistic cuckoo hashing” as its key value index and reports higher space occupancy and better throughput than stock Memcached. Reads only need to check two fixed locations, so many lookups can proceed without locks while writers handle occasional displacements, which improves concurrency, cache locality, and memory utilization.
+
+### Hardware and FPGA Implementations
+
+Cuckoo hashing is also used in on chip key value stores and lookup tables implemented on FPGAs and ASICs. FPGA based key value stores use cuckoo hashing to achieve high memory utilization and pipeline friendly access patterns, and several open source designs implement cuckoo based key value engines in Verilog as research prototypes. Hardware designers prefer cuckoo hashing because its fixed number of candidate locations per key maps naturally to parallel BRAM or SRAM lookups, avoiding pointer chasing and unbounded probe sequences and making timing closure easier in deep pipelines.
+
+### Probabilistic Membership Structures (Cuckoo Filters)
+
+Cuckoo filters apply cuckoo hashing ideas to probabilistic membership testing, serving as an alternative to Bloom filters when deletions are required. Introduced by Fan et al., cuckoo filters store short fingerprints in a cuckoo style table and have been integrated into systems such as RocksDB and other storage engines for duplicate detection and index acceleration. They are useful because they support insertion and deletion while often using less space than counting Bloom filters at low false positive rates and they preserve fast, bounded lookups by probing only a small number of buckets.
+
+### Database and Storage Indexing
+
+Database and storage systems use cuckoo hashing for hash based index structures and file formats that prioritize consistent point lookup latency. RocksDB, for example, offers a CuckooTable SSTable format based on cuckoo hashing for workloads dominated by point lookups, providing one or two memory accesses per query, and research on “cuckoo index” structures uses cuckoo filters to create lightweight secondary indexes over large datasets. These designs are attractive because storage systems often care about 95th or 99th percentile latency, and the bounded number of probes in cuckoo hashing helps keep index lookup time predictable enough to satisfy strict service level objectives.
 
 
 ## Implementation
