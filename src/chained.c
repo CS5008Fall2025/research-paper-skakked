@@ -10,7 +10,12 @@
 #include <string.h>
 #include <stdbool.h>
 
-// Takes a key and capacity, returns bucket index
+/* Takes a key and capacity, returns bucket index
+* Code adapted from Appleby, A. (2011). MurmurHash3 fmix32() finalizer. 
+* Retrieved from https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp.
+* The bit-mixing sequence and associated constants in the hash_with_seed function 
+* were adapted from the fmix32() finalizer of MurmurHash3.
+*/ 
 static size_t hash(int key, size_t capacity) {
     unsigned int k = (unsigned int)key;  // Convert to unsigned for bitwise ops
     k ^= (k >> 16);      // Mix high bits into low bits
@@ -36,7 +41,7 @@ ChainedHashMap* chained_create(size_t capacity) {
     
     map->capacity = capacity;  // Store capacity
     map->size = 0;             // Initially empty
-    return map;
+    return map;                // Return the new map
 }
 
 // Free all memory used by the hash map
@@ -125,8 +130,8 @@ bool chained_delete(ChainedHashMap *map, int key) {
             map->size--;  // Decrement count
             return true;
         }
-        prev = node;
-        node = node->next;
+        prev = node; // Update previous
+        node = node->next; // Move to next node
     }
     return false;  // Key not found
 }
@@ -157,9 +162,9 @@ int chained_max_chain_length(ChainedHashMap *map) {
         // Count nodes in this chain
         while (node) {
             len++;
-            node = node->next;
+            node = node->next; // Move to next node
         }
         if (len > max_len) max_len = len;  // Update max
     }
-    return max_len;
+    return max_len; // Return longest chain length
 }
