@@ -3,6 +3,10 @@
  * Name: Siddharth Kakked
  * Semester: Fall 2025
  * Class: CS 5008
+ * 
+ * Cuckoo Hash Map Implementation is based on: Pagh, R., & Rodler, F. F. (2004). Cuckoo hashing. 
+ * Journal of Algorithms, 51(2), 122-144.
+ * 
  */
 
 #include "cuckoo.h"
@@ -14,8 +18,12 @@
 // If we exceed this, we've likely hit a cycle
 #define MAX_DISPLACEMENTS 500
 
-// Hash function with configurable seed for generating independent h1 and h2
-// Uses MurmurHash-inspired bit mixing
+/* Hash function with configurable seed for generating independent h1 and h2
+* Code adapted from Appleby, A. (2011). MurmurHash3 fmix32() finalizer. 
+* Retrieved from https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp.
+* The bit-mixing sequence and associated constants in the hash_with_seed function 
+* were adapted from the fmix32() finalizer of MurmurHash3.
+*/ 
 static size_t hash_with_seed(int key, unsigned int seed, size_t capacity) {
     unsigned int k = (unsigned int)key;
     k ^= seed;           // Mix in the seed
@@ -32,7 +40,9 @@ static size_t h1(CuckooHashMap *map, int key) {
     return hash_with_seed(key, map->seed1, map->capacity);
 }
 
-// Second hash function - uses seed2 (must be independent from h1)
+// Second hash function
+// Uses seed2 to ensure independence from h1
+// Different seed produces different hash outputs
 static size_t h2(CuckooHashMap *map, int key) {
     return hash_with_seed(key, map->seed2, map->capacity);
 }
@@ -118,14 +128,16 @@ static bool cuckoo_insert_internal(CuckooHashMap *map, int key, int value,
             // Try to place in table1
             size_t idx = h1(map, cur_key);
             if (!map->table1[idx].occupied) {
-                // Empty slot found - success!
+                // Empty slot found 
+                // Success!
                 map->table1[idx].key = cur_key;
                 map->table1[idx].value = cur_value;
                 map->table1[idx].occupied = true;
                 map->size++;
                 return true;
             }
-            // Slot occupied - evict current resident
+            // Slot occupied
+            // Evict current resident
             int evicted_key = map->table1[idx].key;
             int evicted_value = map->table1[idx].value;
             // Place our key here
@@ -139,14 +151,16 @@ static bool cuckoo_insert_internal(CuckooHashMap *map, int key, int value,
             // Try to place in table2
             size_t idx = h2(map, cur_key);
             if (!map->table2[idx].occupied) {
-                // Empty slot found - success!
+                // Empty slot found
+                // Success!
                 map->table2[idx].key = cur_key;
                 map->table2[idx].value = cur_value;
                 map->table2[idx].occupied = true;
                 map->size++;
                 return true;
             }
-            // Slot occupied - evict current resident
+            // Slot occupied
+            // Evict current resident
             int evicted_key = map->table2[idx].key;
             int evicted_value = map->table2[idx].value;
             // Place our key here
@@ -177,7 +191,8 @@ static bool cuckoo_insert_internal(CuckooHashMap *map, int key, int value,
     return false;  // Failed and can't rehash
 }
 
-// Rehash: create new tables with new hash functions and reinsert all keys
+// Rehash the tables with new hash functions
+// Reinserts all existing entries
 static bool cuckoo_rehash(CuckooHashMap *map) {
     // Save old tables
     CuckooEntry *old_table1 = map->table1;
@@ -185,12 +200,14 @@ static bool cuckoo_rehash(CuckooHashMap *map) {
     size_t old_capacity = map->capacity;
     size_t old_size = map->size;
     
-    // Allocate new tables (same capacity, just new hash functions)
+    // Allocate new tables
+    // Keep same capacity for simplicity
     map->table1 = calloc(old_capacity, sizeof(CuckooEntry));
     map->table2 = calloc(old_capacity, sizeof(CuckooEntry));
     
     if (!map->table1 || !map->table2) {
-        // Allocation failed - restore old tables
+        // Allocation failed
+        // Restore old tables
         free(map->table1);
         free(map->table2);
         map->table1 = old_table1;
@@ -209,7 +226,8 @@ static bool cuckoo_rehash(CuckooHashMap *map) {
             // Don't allow nested rehash during rehash
             if (!cuckoo_insert_internal(map, old_table1[i].key, 
                                         old_table1[i].value, false)) {
-                // Rehash failed - restore old state
+                // Rehash failed
+                // Restore old state
                 free(map->table1);
                 free(map->table2);
                 map->table1 = old_table1;
@@ -232,7 +250,8 @@ static bool cuckoo_rehash(CuckooHashMap *map) {
         }
     }
     
-    // Success - free old tables
+    // Success
+    // Free old tables
     free(old_table1);
     free(old_table2);
     return true;
@@ -242,8 +261,12 @@ static bool cuckoo_rehash(CuckooHashMap *map) {
 bool cuckoo_put(CuckooHashMap *map, int key, int value) {
     if (!map) return false;
     
-    // Check load factor - expand if too high
-    // Cuckoo hashing works best below ~45% load
+    /*
+    * Check load factor and expand if too high
+    * Code adapted from Kutzelnigg, R. (2006). Bipartite random graphs and cuckoo hashing.
+    * Proceedings of the Fourth Colloquium on Mathematics and Computer Science, 400-406.
+    * Retrieved from https://arxiv.org/abs/cs/0604034.
+    */ 
     double load = (double)map->size / (2.0 * map->capacity);
     if (load > 0.45 && map->size > 0) {
         // Need to expand tables
@@ -256,7 +279,8 @@ bool cuckoo_put(CuckooHashMap *map, int key, int value) {
         map->table1 = calloc(new_capacity, sizeof(CuckooEntry));
         map->table2 = calloc(new_capacity, sizeof(CuckooEntry));
         
-        if (map->table1 && map->table2) {
+        if (map->table1 && map->table2) { // Allocation succeeded
+            // Update capacity and reinsert all existing entries
             size_t old_size = map->size;
             map->capacity = new_capacity;
             map->size = 0;
@@ -279,7 +303,8 @@ bool cuckoo_put(CuckooHashMap *map, int key, int value) {
                 free(old_table1);
                 free(old_table2);
             } else {
-                // Expansion failed - restore old tables
+                // Expansion failed
+                // Restore old tables
                 free(map->table1);
                 free(map->table2);
                 map->table1 = old_table1;
@@ -288,7 +313,8 @@ bool cuckoo_put(CuckooHashMap *map, int key, int value) {
                 map->size = old_size;
             }
         } else {
-            // Allocation failed - restore old tables
+            // Allocation failed
+            // Restore old tables
             free(map->table1);
             free(map->table2);
             map->table1 = old_table1;
@@ -296,11 +322,14 @@ bool cuckoo_put(CuckooHashMap *map, int key, int value) {
         }
     }
     
-    // Insert the key (allow rehash if needed)
+    // Insert the key
+    // Return true if inserted, false if rehash needed and failed
     return cuckoo_insert_internal(map, key, value, true);
 }
 
-// Lookup: O(1) worst case - check exactly 2 locations
+// Lookup: O(1) worst case
+// Check exactly 2 locations
+// Return true if found, false otherwise
 bool cuckoo_get(CuckooHashMap *map, int key, int *value) {
     if (!map) return false;
     
@@ -321,7 +350,9 @@ bool cuckoo_get(CuckooHashMap *map, int key, int *value) {
     return false;  // Not in either location
 }
 
-// Delete: O(1) worst case - check exactly 2 locations
+// Delete: O(1) worst case
+// Check exactly 2 locations
+// Return true if deleted, false if not found
 bool cuckoo_delete(CuckooHashMap *map, int key) {
     if (!map) return false;
     
@@ -356,7 +387,8 @@ size_t cuckoo_memory_usage(CuckooHashMap *map) {
     return sizeof(CuckooHashMap) + 2 * map->capacity * sizeof(CuckooEntry);
 }
 
-// Return number of rehashes (for analysis)
+// Return number of rehashes
+// Useful for performance analysis
 int cuckoo_rehash_count(CuckooHashMap *map) {
     return map ? map->rehash_count : 0;
 }
