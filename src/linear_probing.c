@@ -8,7 +8,12 @@
 #include "linear_probing.h"
 #include <stdlib.h>
 
-// Hash function using MurmurHash-inspired bit mixing
+/* Hash function using MurmurHash-inspired bit mixing
+* Code adapted from Appleby, A. (2011). MurmurHash3 fmix32() finalizer. 
+* Retrieved from https://github.com/aappleby/smhasher/blob/master/src/MurmurHash3.cpp.
+* The bit-mixing sequence and associated constants in the hash_with_seed function 
+* were adapted from the fmix32() finalizer of MurmurHash3.
+*/
 static size_t hash(int key, size_t capacity) {
     unsigned int k = (unsigned int)key;
     k ^= (k >> 16);      // Mix high bits down
@@ -116,7 +121,8 @@ bool linear_delete(LinearHashMap *map, int key) {
         if (map->entries[idx].state == EMPTY) {
             return false;
         }
-        // Found the key - mark as deleted
+        // Found the key 
+        // Mark as deleted
         if (map->entries[idx].state == OCCUPIED && 
             map->entries[idx].key == key) {
             map->entries[idx].state = DELETED;  // Tombstone, not EMPTY
@@ -137,7 +143,8 @@ size_t linear_size(LinearHashMap *map) {
 // Calculate total memory usage
 size_t linear_memory_usage(LinearHashMap *map) {
     if (!map) return 0;
-    // Main struct + all entries (fixed size, no dynamic allocation per entry)
+    // Main struct + all entries
+    // No additional dynamic allocations per entry
     return sizeof(LinearHashMap) + map->capacity * sizeof(LinearEntry);
 }
 
