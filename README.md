@@ -335,11 +335,14 @@ This implementation keeps the same capacity since the experiments control load f
 
 Several parts of the implementation were challenging. Managing two tables and hash seeds (`table1`, `table2`, `seed1`, `seed2`) across insertions, deletions, and rehashes was finicky and mistakes or oversight in index calculations or seed initialization often caused missing keys. Choosing `MAX_DISPLACEMENTS` involves a trade-off between allowing for a large enough amount of displacements to avoid rehashing. 500 worked well for my testing. Memory management and allocation failures caused a lot of issues and was extremely challenging.
 
+
 ## Summary
 
-The analysis of cuckoo hashing demonstrated that its theoretical guarantees translate clearly into measurable practical behavior. The structure’s defining property is that there are two possible homes per key. It proved effective in ensuring strictly bounded lookup time, which remained constant across all tested table sizes. In contrast, both chained hashing and linear probing showed increasing worst case behavior as the number of elements grew, with longer chains and probe sequences emerging even at moderate load factors. The empirical experiments confirmed that all three hash table designs deliver close to linear scaling for insertions and lookups under a fixed load factor, but they differ significantly in constant factors. Linear probing emerged as the fastest in terms of throughput due to its strong cache locality, while cuckoo hashing incurred higher insertion costs because of displacement chains and occasional rehashing. Despite this overhead, cuckoo hashing maintained competitive lookup performance and was the only structure that provided true worst case \(O(1)\) lookup behavior.
+This report examined cuckoo hashing, a hash table structure that guarantees worst case constant time lookup by allowing each key to reside in one of two locations determined by independent hash functions. The empirical analysis supported the theoretical expectations. Across all tested sizes from one thousand to one hundred thousand elements, cuckoo hashing completed every lookup in exactly two probes. In contrast, separate chaining and linear probing showed worst case behavior that grew with table size, reaching seven node chains and probe sequences as long as thirty eight steps.
 
-Through building the implementation from scratch in C, the project highlighted complexity that underlies cuckoo hashing. Managing displacement chains, avoiding infinite loops, designing robust hash functions, and implementing rehashing safely required far more care than simpler strategies like chaining or linear probing. Overall, the project strengthened understanding of how algorithmic guarantees interact with hardware behavior, memory layout, and real world workloads, and it demonstrated why cuckoo hashing continues to influence modern system design.
+The experiments also highlighted the central trade-offs in cuckoo hashing. Insertions were consistently slower than in the comparison schemes, particularly at larger scales, because displacement chains and occasional rehashing introduce additional work.
+
+Building cuckoo hashing from scratch taught me far more than I expected at the start of the project.Managing two coordinated tables revealed how easy it is for a minor indexing mistake or an uninitialized flag to break the entire structure in ways that are not immediately visible.Finally, comparing cuckoo hashing with linear probing and separate chaining helped me understand how algorithms behave at scale and how hardware concepts like cache locality affect performance.
 
 
 ## References 
@@ -376,4 +379,3 @@ Through building the implementation from scratch in C, the project highlighted c
 [16] Andreas Kipf, Damian Chromejko, Alexander Hall, Peter Boncz, and David G. Andersen. 2020. Cuckoo Index: A Lightweight Secondary Index Structure. Proceedings of the VLDB Endowment 13, 13 (September 2020), 3559–3572. https://doi.org/10.14778/3424573.3424577
 
 [17] Austin Appleby. 2008. MurmurHash. https://github.com/aappleby/smhasher
-
