@@ -9,7 +9,7 @@
 
 Cuckoo hashing is a hash table that achieves $O(1)$ worst-case lookup by giving each key two possible addresses instead of one. Unlike traditional hash tables where collisions can create long chains, cuckoo hashing guarantees that any key can be found by checking at most two locations. The name is derived from brood parasitism, a behavior in which a cuckoo chick pushes other eggs or young out of the nest upon hatching. Analogously, inserting a new key into a cuckoo hash table may push an older key to a different location [1].A key is stored in one of its two possible locations, so lookup simply checks both. Unlike traditional hash tables where collisions can create long chains, cuckoo hashing guarantees that any key can be found by checking at most two locations.[1]
 
-Cuckoo hashing was introduced by Rasmus Pagh and Flemming Friche Rodler in 2001 at the European Symposium on Algorithms, with the full paper published in the Journal of Algorithms in 2004 [1]. The authors developed this data structure to provide a practical dictionary with worst-case constant lookup time, matching the theoretical performance of dynamic perfect hashing [2] while being significantly simpler to implement. The original paper established key theoretical results including the requirement that load factor remain below approximately 50%, and that the expected number of displacements during insertion is constant. The work was recognized with the ESA Test-of-Time Award in 2020, acknowledging its significant impact on both theoretical computer science and practical systems design. Since its introduction, numerous variants have been developed, including d-ary cuckoo hashing which uses more than two hash functions to achieve higher load factors [3], and the recent "bubble-up" technique by Kuszmaul and Mitzenmacher which optimizes insertion performance [4].
+Cuckoo hashing was introduced by Rasmus Pagh and Flemming Friche Rodler in 2001 at the European Symposium on Algorithms, with the full paper published in the Journal of Algorithms in 2004 [1]. The authors developed this data structure to provide a practical dictionary with worst-case constant lookup time, matching the theoretical performance of dynamic perfect hashing [2] while being significantly simpler to implement. The original paper established key theoretical results including the requirement that load factor remain below approximately 50%, and that the expected number of displacements during insertion is constant [1]. The work was recognized with the ESA Test-of-Time Award in 2020, acknowledging its significant impact on both theoretical computer science and practical systems design[1]. Since its introduction, numerous variants have been developed, including d-ary cuckoo hashing which uses more than two hash functions to achieve higher load factors [3], and the recent "bubble-up" technique by Kuszmaul and Mitzenmacher which optimizes insertion performance [4].
 
 This report analyzes cuckoo hashing its history and its theoretical foundations (time and space complexity), empirical benchmarks, real-world applications, and details of my implementation in C.
 
@@ -18,17 +18,17 @@ This report analyzes cuckoo hashing its history and its theoretical foundations 
 
 **Overview**
 
-The cuckoo hashing data structure consists of two hash tables $T_1$ and $T_2$, each of size $m$, and two independent hash functions $h_1$ and $h_2$. Every key $k$ is stored in exactly two locations: $T_1[h_1(k)]$ or $T_2[h_2(k)]$
+The cuckoo hashing data structure consists of two hash tables $T_1$ and $T_2$, each of size $m$, and two independent hash functions $h_1$ and $h_2$. Every key $k$ is stored in exactly two locations: $T_1[h_1(k)]$ or $T_2[h_2(k)]$[1].
 
-At any given time, a stored key occupies one of these two positions. On insertion, if the target position is already occupied, cuckoo hashing evicts the existing key and moves it to its alternate position, possibly triggering a chain of evictions. If too many displacements occur, the table is rehashed with new hash functions. This design keeps lookups simple while still allowing high load factors.
+At any given time, a stored key occupies one of these two positions. On insertion, if the target position is already occupied, cuckoo hashing evicts the existing key and moves it to its alternate position, possibly triggering a chain of evictions. If too many displacements occur, the table is rehashed with new hash functions. This design keeps lookups simple while still allowing high load factors[1].
 
 **Time Complexity**
 
-To analyze time complexity, let $n$ be the number of stored keys, and let $m$ be the capacity of each table so that the total number of slots is $2m$. The load factor is $\alpha = \frac{n}{2m}$.
+To analyze time complexity, let $n$ be the number of stored keys, and let $m$ be the capacity of each table so that the total number of slots is $2m$. The load factor is $\alpha = \frac{n}{2m}$.[1,5]
 
 Under standard assumptions that $h_1$ and $h_2$ behave like independent random functions, the expected behavior is:
 
-- **Lookup**  
+- **Lookup** [1]  
   To determine whether a key $k$ is present, cuckoo hashing checks at most two locations:
   
   $T_1[h_1(k)]$ and $T_2[h_2(k)]$
@@ -38,12 +38,12 @@ Under standard assumptions that $h_1$ and $h_2$ behave like independent random f
   $T_{\text{lookup}}(n) = O(1)$ (worst case)
 
 
-- **Deletion**  
+- **Deletion** [1] 
   Deletion uses the same locations as lookup. If the key is found in either candidate position, it is removed and the slot is marked empty.
 
   $T_{\text{delete}}(n) = O(1)$
 
-- **Insertion**  
+- **Insertion** [1] 
   Insertion is more involved because of possible displacements. For a new key $k$, the algorithm:
 
   1. Tries to place it at $T_1[h_1(k)]$.
@@ -75,17 +75,17 @@ Cuckoo hashing maintains two tables $𝑇_1$ and $𝑇_2$ of equal size $𝑚$. 
 
 $n \approx 2m\alpha \quad \Rightarrow \quad m \approx \frac{n}{2\alpha}$
 
-Since $\alpha$ is treated as a constant, this implies that space usage is $\text{Space}(n) = \Theta(m) = \Theta(n)$, which is linear in the number of stored keys. Cuckoo hashing does not require auxiliary pointer structures such as linked lists inside buckets, so there is relatively little overhead beyond the tables themselves.
+Since $\alpha$ is treated as a constant, this implies that space usage is $\text{Space}(n) = \Theta(m) = \Theta(n)$, which is linear in the number of stored keys. Cuckoo hashing does not require auxiliary pointer structures such as linked lists inside buckets, so there is relatively little overhead beyond the tables themselves[1].
 
 
 **General analysis of the datastructure**
 
-Cuckoo hashing keeps its core operations simple while using a displacement chain to resolve collisions. The table maintains two arrays $T_1$ and $T_2$ with hash functions $h_1$ and $h_2$, and each key $k$ is allowed to live in exactly one of the two positions $T_1[h_1(k)]$ or $T_2[h_2(k)]$. Lookup computes $h_1(k)$ and $h_2(k)$, inspects those two cells, and either returns the value or reports that the key is absent, so it always performs a constant number of probes and has worst case time $\Theta(1)$. Deletion mirrors lookup: the structure checks both candidate positions for $k$ and, if found, clears that slot, with no need for tombstones or list manipulation. Insertion is where the displacement chain appears. To insert a key $k$, the algorithm first tries to place it at $T_1[h_1(k)]$; if that slot is empty, the operation finishes immediately, but if it already holds some key $k'$, then $k$ takes that position and $k'$ is evicted and moved to its alternate location $T_2[h_2(k')]$. If that alternate slot is also occupied, the resident key is evicted in turn and moved back to its own alternate position in $T_1$, and this process repeats, producing a sequence of evictions that alternates between $T_1$ and $T_2$ until an empty slot is found. Under standard random hashing assumptions this displacement chain has expected length $O(1)$, so most insertions involve only a small number of moves. Occasionally, however, the chain forms a cycle in which moving one key eventually causes the algorithm to revisit a previous configuration of keys and positions; implementations detect this by imposing a maximum number of allowed displacements per insertion, and if that limit is exceeded the table performs a rehash, choosing new hash functions and reinserting all keys so that the invariant can be restored.
+Cuckoo hashing keeps its core operations simple while using a displacement chain to resolve collisions. The table maintains two arrays $T_1$ and $T_2$ with hash functions $h_1$ and $h_2$, and each key $k$ is allowed to live in exactly one of the two positions $T_1[h_1(k)]$ or $T_2[h_2(k)]$. Lookup computes $h_1(k)$ and $h_2(k)$, inspects those two cells, and either returns the value or reports that the key is absent, so it always performs a constant number of probes and has worst case time $\Theta(1)$. Deletion mirrors lookup: the structure checks both candidate positions for $k$ and, if found, clears that slot, with no need for tombstones or list manipulation. Insertion is where the displacement chain appears. To insert a key $k$, the algorithm first tries to place it at $T_1[h_1(k)]$; if that slot is empty, the operation finishes immediately, but if it already holds some key $k'$, then $k$ takes that position and $k'$ is evicted and moved to its alternate location $T_2[h_2(k')]$. If that alternate slot is also occupied, the resident key is evicted in turn and moved back to its own alternate position in $T_1$, and this process repeats, producing a sequence of evictions that alternates between $T_1$ and $T_2$ until an empty slot is found. Under standard random hashing assumptions this displacement chain has expected length $O(1)$, so most insertions involve only a small number of moves. Occasionally, however, the chain forms a cycle in which moving one key eventually causes the algorithm to revisit a previous configuration of keys and positions; implementations detect this by imposing a maximum number of allowed displacements per insertion, and if that limit is exceeded the table performs a rehash, choosing new hash functions and reinserting all keys so that the invariant can be restored.[1,5,6]
 
 
 ## Empirical Analysis
 
-To evaluate the cuckoo hashing I implemented three different hash tables in C that all store 32 bit integer keys and values. Cuckoo hashing (two tables, two hash functions, displacement and rehash) is compared against two simpler and widely used collision resolution strategies: separate chaining (one table with linked lists in each bucket) and linear probing (open addressing with tombstones). For each structure, I fixed the load factor to 50% by choosing the capacity to be roughly twice the number of elements, and then measure insertion, lookup, and deletion time as the table size grows.
+To evaluate the cuckoo hashing I implemented three different hash tables in C that all store 32 bit integer keys and values. Cuckoo hashing (two tables, two hash functions, displacement and rehash) is compared against two simpler and widely used collision resolution strategies: separate chaining (one table with linked lists in each bucket) and linear probing (open addressing with tombstones). For each structure, the load factor was fixed to 50% by choosing the capacity to be roughly twice the number of elements, and then measure insertion, lookup, and deletion time as the table size grows.
 
 **Experiment 1: Worst case analysis**
 
@@ -135,11 +135,11 @@ Cuckoo hashing is used in systems that require predictable, low latency hash tab
 
 ### Network Packet Processing 
 
-Cuckoo hashing is widely used in software routers and middleboxes to implement fast dictionaries for flow tables, NAT mappings, access control lists, and other per flow state. Frameworks like Intel’s Data Plane Development Kit (DPDK) provide high performance cuckoo hash tables, and systems such as CuckooSwitch build Ethernet forwarding tables on top of DPDK’s hash library to process packets at line rate. This is valuable because routers and switches must sustain millions of lookups per second, and a single slow lookup can cause packet drops or buffer buildup, so cuckoo hashing’s small, bounded number of probes helps keep latency stable and throughput high.
+Cuckoo hashing is widely used in software routers and middleboxes to implement fast dictionaries for flow tables, NAT mappings, access control lists, and other per flow state [7]. Frameworks like Intel’s Data Plane Development Kit (DPDK) provide high performance cuckoo hash tables, and systems such as CuckooSwitch build Ethernet forwarding tables on top of DPDK’s hash library to process packets at line rate[8,9]. This is valuable because routers and switches must sustain millions of lookups per second, and a single slow lookup can cause packet drops or buffer buildup, so cuckoo hashing’s small, bounded number of probes helps keep latency stable and throughput high.[7-9]
 
 ### In Memory Caches and Key Value Stores
 
-In memory caches and key value stores use cuckoo hashing for their index structures when workloads are read heavy and low latency is critical. MemC3, a Memcached variant from Carnegie Mellon, is a prominent example that adopts “optimistic cuckoo hashing” as its key value index and reports higher space occupancy and better throughput than stock Memcached. Reads only need to check two fixed locations, so many lookups can proceed without locks while writers handle occasional displacements, which improves concurrency, cache locality, and memory utilization.
+In memory caches and key value stores use cuckoo hashing for their index structures when workloads are read heavy and low latency is critical. MemC3, a Memcached variant from Carnegie Mellon, is a prominent example that adopts “optimistic cuckoo hashing” as its key value index and reports higher space occupancy and better throughput than stock Memcached. Reads only need to check two fixed locations, so many lookups can proceed without locks while writers handle occasional displacements, which improves concurrency, cache locality, and memory utilization.[10,11]
 
 ### Hardware and FPGA Implementations
 
@@ -362,4 +362,30 @@ Through building the implementation from scratch in C, the project highlighted c
 
 [4] William Kuszmaul and Michael Mitzenmacher. 2025. Efficient d-ary cuckoo hashing at high load factors by bubbling up. In Proceedings of the 2025 ACM–SIAM Symposium on Discrete Algorithms (SODA 2025). Society for Industrial and Applied Mathematics.
 
-[5]
+[5] A. Kirsch, M. D. Mitzenmacher, and U. Wieder. 2010. More robust hashing: Cuckoo hashing with a stash. SIAM Journal on Computing 39, 4 (2010), 1543–1561. DOI:https://doi.org/10.1137/080728743.
+
+[6] M. Aumüller, M. Dietzfelbinger, and P. Woelfel. 2014. Explicit and efficient hash families suffice for cuckoo hashing with a stash. Algorithmica 70, 3 (2014), 428–456. DOI:https://doi.org/10.1007/s00453-013-9840-x.
+
+[7] N. Le Scouarnec. 2018. Cuckoo++ hash tables: High-performance hash tables for networking applications. In Proceedings of the ACM/IEEE Symposium on Architectures for Networking and Communications Systems (ANCS '18), 41–54. DOI:https://doi.org/10.1145/3230718.3232629
+
+[8] Intel Corporation. 2024. Data Plane Development Kit (DPDK) Programmer's Guide: Hash Library. https://doc.dpdk.org/guides/prog_guide/hash_lib.html
+
+[9]  D. Zhou, B. Fan, H. Lim, D. G. Andersen, and M. Kaminsky. 2013. Scalable, high performance Ethernet forwarding with CuckooSwitch. In Proceedings of the 9th ACM International Conference on Emerging Networking Experiments and Technologies (CoNEXT '13), 97–108. DOI:https://doi.org/10.1145/2535372.2535379
+
+[10]  B. Fan, D. G. Andersen, and M. Kaminsky. 2013. MemC3: Compact and concurrent MemCache with dumber caching and smarter hashing. In Proceedings of the 10th USENIX Symposium on Networked Systems Design and Implementation (NSDI '13), 371–384.
+
+[11] M. T. Goodrich, D. S. Hirschberg, M. Mitzenmacher, and J. Thaler. 2011. Fully de-amortized cuckoo hashing for cache-oblivious dictionaries and multimaps. arXiv preprint arXiv:1107.4378 (2011).
+
+[12]
+
+[13]
+
+[14]
+
+[15]
+
+[16]
+
+[17]
+
+[18]
