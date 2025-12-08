@@ -103,7 +103,8 @@ To test this hypothesis, a worst case experiment was conducted that measures the
 |         50000  | 6                         | 38                         | 2                    |
 |        100000  | 7                         | 29                         | 2                    |
 
-Across the tested sizes, the worst case cost for separate chaining and linear probing increases with $n$, while cuckoo hashing remains bounded by a constant. The maximum chain length for chaining grows from 4–5 nodes at smaller sizes to 6–7 nodes at $n = 50000$ and $n = 100000$, and the longest probe sequence for linear probing reaches 38 probes before fluctuating around 29 due to randomness in the key distribution. In contrast, cuckoo hashing always completes lookups in at most two probes, exactly matching the theoretical $O(1)$ worst case guarantee. Although these worst case values are still small relative to $n$ at the tested load factor, the trend illustrates the qualitative difference: the worst case lookup cost of chaining and linear probing can grow with table size and clustering, while cuckoo hashing maintains a strict constant upper bound.
+The results confirm the hypothesis. Chaining's maximum chain length grew from 4–5 to 6–7 as $n$ increased, and linear probing's longest probe sequence reached 38. Cuckoo hashing always completed lookups in exactly two probes, matching its $O(1)$ worst-case guarantee.
+
 
 **Experiment 2: Scaling behavior of hashmap insertions**
 
@@ -126,7 +127,7 @@ To evaluate lookup performance under the same conditions as the insertion experi
 ![Lookup Performance Plot](https://github.com/CS5008Fall2025/research-paper-skakked/blob/main/graphs/lookup_plot.png)
 
 
-Across all tested sizes, lookup time grows very slowly with $n$, consistent with the expected $O(1)$ average behavior at a fixed load factor, but the relative ordering of the three schemes changes with scale. At small to medium sizes cuckoo hashing is at least competitive and often best; for example, at $n = 1000$ both chained and cuckoo complete all lookups in about $0.006$ ms compared with $0.008$ ms for linear probing, and at $n = 25000$ cuckoo takes $0.144$ ms versus $0.174$ ms for chained and $0.197$ ms for linear probing. At larger sizes, however, linear probing becomes the fastest: at $n = 100000$ and $50%$ load it achieves $1.529$ ms for $n$ successful lookups compared with $1.613$ ms for chained hashing and $1.846$ ms for cuckoo hashing, roughly a $17%$ improvement over cuckoo. These results show that all three designs deliver constant time lookups in practice at fixed load, with cuckoo hashing slightly favored at smaller scales and linear probing offering the best lookup throughput once tables become large in this implementation.
+All three designs showed slow growth consistent with O(1) average behavior, but their relative performance varied with scale. At small to medium sizes, cuckoo hashing was competitive or best—at $n = 25000$, cuckoo took 0.144 ms versus 0.174 ms for chaining and 0.197 ms for linear probing. At larger sizes, linear probing pulled ahead: at $n = 100000$, it completed lookups in 1.529 ms compared to 1.613 ms for chaining and 1.846 ms for cuckoo, roughly 17% faster than cuckoo. All three deliver constant-time lookups in practice, with cuckoo slightly favored at smaller scales and linear probing offering the best throughput at larger sizes.
 
 
 ## Application
