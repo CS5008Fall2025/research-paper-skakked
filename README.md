@@ -220,7 +220,7 @@ The `h1` and `h2` functions call this helper with `seed1` and `seed2`. Seeds are
 
 #### Insertion with Displacement Chain
 
-Insertion is the most complex operation. It implements the characteristic cuckoo displacement process that alternates between the two tables:
+Insertion is the most complex operation. It implements cuckoo hashing's displacement process, alternating between the two tables:
 
 ```c
 bool cuckoo_insert_internal(CuckooHashMap *map, int key, int value, bool count_size) {
