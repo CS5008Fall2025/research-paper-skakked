@@ -143,15 +143,11 @@ In memory caches and key value stores use cuckoo hashing for their index structu
 
 ### Hardware and FPGA Implementations
 
-Cuckoo hashing is also used in on chip key value stores and lookup tables implemented on FPGAs and ASICs. FPGA based key value stores use cuckoo hashing to achieve high memory utilization and pipeline friendly access patterns, and several open source designs implement cuckoo based key value engines in Verilog as research prototypes. Hardware designers prefer cuckoo hashing because its fixed number of candidate locations per key maps naturally to parallel BRAM or SRAM lookups, avoiding pointer chasing and unbounded probe sequences and making timing closure easier in deep pipelines.
-
-### Probabilistic Membership Structures (Cuckoo Filters)
-
-Cuckoo filters apply cuckoo hashing ideas to probabilistic membership testing, serving as an alternative to Bloom filters when deletions are required. Introduced by Fan et al., cuckoo filters store short fingerprints in a cuckoo style table and have been integrated into systems such as RocksDB and other storage engines for duplicate detection and index acceleration. They are useful because they support insertion and deletion while often using less space than counting Bloom filters at low false positive rates and they preserve fast, bounded lookups by probing only a small number of buckets.
+Cuckoo hashing is also used in on chip key value stores and lookup tables implemented on FPGAs and ASICs. FPGA based key value stores use cuckoo hashing to achieve high memory utilization and pipeline friendly access patterns, and several open source designs implement cuckoo based key value engines in Verilog as research prototypes[12]. Hardware designers prefer cuckoo hashing because its fixed number of candidate locations per key maps naturally to parallel BRAM or SRAM lookups, avoiding pointer chasing and unbounded probe sequences and making timing closure easier in deep pipelines.[12-14].
 
 ### Database and Storage Indexing
 
-Database and storage systems use cuckoo hashing for hash based index structures and file formats that prioritize consistent point lookup latency. RocksDB, for example, offers a CuckooTable SSTable format based on cuckoo hashing for workloads dominated by point lookups, providing one or two memory accesses per query, and research on “cuckoo index” structures uses cuckoo filters to create lightweight secondary indexes over large datasets. These designs are attractive because storage systems often care about 95th or 99th percentile latency, and the bounded number of probes in cuckoo hashing helps keep index lookup time predictable enough to satisfy strict service level objectives.
+Database and storage systems use cuckoo hashing for hash based index structures and file formats that prioritize consistent point lookup latency. RocksDB, for example, offers a CuckooTable SSTable format based on cuckoo hashing for workloads dominated by point lookups, providing one or two memory accesses per query, and research on “cuckoo index” structures uses cuckoo filters to create lightweight secondary indexes over large datasets [15]. These designs are attractive because storage systems often care about 95th or 99th percentile latency, and the bounded number of probes in cuckoo hashing helps keep index lookup time predictable enough to satisfy strict service level objectives [16].
 
 
 ## Implementation
@@ -376,15 +372,15 @@ Through building the implementation from scratch in C, the project highlighted c
 
 [11] M. T. Goodrich, D. S. Hirschberg, M. Mitzenmacher, and J. Thaler. 2011. Fully de-amortized cuckoo hashing for cache-oblivious dictionaries and multimaps. arXiv preprint arXiv:1107.4378 (2011).
 
-[12]
+[12] Ruizhi Zhang, Sasindu Wijeratne, Yang Yang, Sanmukh R. Kuppannagari, and Viktor K. Prasanna. 2020. A High Throughput Parallel Hash Table on FPGA using XOR-based Memory. In 2020 IEEE High Performance Extreme Computing Conference (HPEC). IEEE, 1–7. https://doi.org/10.1109/HPEC43674.2020.9286199
 
-[13]
+[13] Mikhail Asiatici and Paolo Ienne. 2022. Request, Coalesce, Serve, and Forget: Miss-Optimized Memory Systems for Bandwidth-Bound Cache-Unfriendly Applications on FPGAs. ACM Transactions on Reconfigurable Technology and Systems 15, 2, Article 13 (June 2022), 33 pages. https://doi.org/10.1145/3466823Retry
 
-[14]
+[14] Zsolt István. 2013. Hash Table for Large Key-Value Stores on FPGAs. Master's thesis. ETH Zurich, Department of Computer Science, Systems Group, Zurich, Switzerland. https://doi.org/10.3929/ethz-a-007636118
 
-[15]
+[15] Yuanyuan Sun, Yu Hua, Dan Feng, Ling Yang, Pengfei Zuo, Shunde Cao, and Yuncheng Guo. 2017. A Collision-Mitigation Cuckoo Hashing Scheme for Large-Scale Storage Systems. IEEE Transactions on Parallel and Distributed Systems 28, 3 (March 2017), 619–632. https://doi.org/10.1109/TPDS.2016.2591011
 
-[16]
+[16] Andreas Kipf, Damian Chromejko, Alexander Hall, Peter Boncz, and David G. Andersen. 2020. Cuckoo Index: A Lightweight Secondary Index Structure. Proceedings of the VLDB Endowment 13, 13 (September 2020), 3559–3572. https://doi.org/10.14778/3424573.3424577
 
 [17]
 
