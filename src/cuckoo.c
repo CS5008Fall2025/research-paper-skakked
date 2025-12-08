@@ -15,7 +15,6 @@
 #include <time.h>
 
 // Maximum displacement attempts before triggering rehash
-// If we exceed this, we've likely hit a cycle
 #define MAX_DISPLACEMENTS 500
 
 /* Hash function with configurable seed for generating independent h1 and h2

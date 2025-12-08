@@ -3,6 +3,12 @@
  * Name: Siddharth Kakked
  * Semester: Fall 2025
  * Class: CS 5008
+ * 
+ * Benchmark design and metrics follow standard analyses of hashing with
+ * chaining, linear probing, and cuckoo hashing:
+ *   - Knuth, TAOCP Vol. 3, Sorting and Searching
+ *   - Cormen et al., Introduction to Algorithms, chapter on hashing
+ *   - Pagh and Rodler, "Cuckoo Hashing", Journal of Algorithms 51(2), 2004
  */
 
 #include "test_benchmarks.h"
@@ -20,27 +26,27 @@ BenchmarkResult benchmark_insertion(int *keys, int n, size_t capacity) {
     
     // Benchmark Chained HashMap insertion
     ChainedHashMap *ch = chained_create(capacity);
-    start = get_time_ms();
+    start = get_time_ms(); // Start timing
     for (int i = 0; i < n; i++) {
         chained_put(ch, keys[i], i);
     }
-    end = get_time_ms();
+    end = get_time_ms(); // End timing
     result.chained_ms = end - start;
     chained_destroy(ch);
     
     // Benchmark Linear Probing insertion
     LinearHashMap *lh = linear_create(capacity);
-    start = get_time_ms();
+    start = get_time_ms(); // Start timing
     for (int i = 0; i < n; i++) {
         linear_put(lh, keys[i], i);
     }
-    end = get_time_ms();
+    end = get_time_ms(); // End timing
     result.linear_ms = end - start;
     linear_destroy(lh);
     
     // Benchmark Cuckoo insertion
     CuckooHashMap *cu = cuckoo_create(capacity);
-    start = get_time_ms();
+    start = get_time_ms(); // Start timing
     for (int i = 0; i < n; i++) {
         cuckoo_put(cu, keys[i], i);
     }
@@ -54,7 +60,7 @@ BenchmarkResult benchmark_insertion(int *keys, int n, size_t capacity) {
 
 // Benchmark lookup performance
 BenchmarkResult benchmark_lookup(int *keys, int n, size_t capacity) {
-    BenchmarkResult result = {0, 0, 0, 0};
+    BenchmarkResult result = {0, 0, 0, 0}; // Initialize result
     double start, end;
     int val;
     
@@ -63,6 +69,7 @@ BenchmarkResult benchmark_lookup(int *keys, int n, size_t capacity) {
     LinearHashMap *lh = linear_create(capacity);
     CuckooHashMap *cu = cuckoo_create(capacity);
     
+    // Insert all keys
     for (int i = 0; i < n; i++) {
         chained_put(ch, keys[i], i);
         linear_put(lh, keys[i], i);
@@ -70,7 +77,7 @@ BenchmarkResult benchmark_lookup(int *keys, int n, size_t capacity) {
     }
     
     // Benchmark Chained lookups
-    start = get_time_ms();
+    start = get_time_ms(); // Start timing
     for (int i = 0; i < n; i++) {
         chained_get(ch, keys[i], &val);
     }
@@ -78,22 +85,24 @@ BenchmarkResult benchmark_lookup(int *keys, int n, size_t capacity) {
     result.chained_ms = end - start;
     
     // Benchmark Linear Probing lookups
-    start = get_time_ms();
+    start = get_time_ms(); // Start timing
     for (int i = 0; i < n; i++) {
         linear_get(lh, keys[i], &val);
     }
-    end = get_time_ms();
+    end = get_time_ms(); // End timing
     result.linear_ms = end - start;
     
     // Benchmark Cuckoo lookups
-    start = get_time_ms();
+    start = get_time_ms(); // Start timing
     for (int i = 0; i < n; i++) {
         cuckoo_get(cu, keys[i], &val);
     }
-    end = get_time_ms();
+    // Benchmark Cuckoo lookups
+    end = get_time_ms(); // End timing
     result.cuckoo_ms = end - start;
     result.cuckoo_rehashes = cuckoo_rehash_count(cu);
     
+    // Clean up
     chained_destroy(ch);
     linear_destroy(lh);
     cuckoo_destroy(cu);
@@ -111,6 +120,7 @@ BenchmarkResult benchmark_deletion(int *keys, int n, size_t capacity) {
     LinearHashMap *lh = linear_create(capacity);
     CuckooHashMap *cu = cuckoo_create(capacity);
     
+    // Insert all keys
     for (int i = 0; i < n; i++) {
         chained_put(ch, keys[i], i);
         linear_put(lh, keys[i], i);
@@ -118,27 +128,27 @@ BenchmarkResult benchmark_deletion(int *keys, int n, size_t capacity) {
     }
     
     // Benchmark Chained deletions
-    start = get_time_ms();
+    start = get_time_ms(); // Start timing
     for (int i = 0; i < n; i++) {
         chained_delete(ch, keys[i]);
     }
-    end = get_time_ms();
+    end = get_time_ms(); // End timing
     result.chained_ms = end - start;
     
     // Benchmark Linear Probing deletions
-    start = get_time_ms();
+    start = get_time_ms(); // Start timing
     for (int i = 0; i < n; i++) {
         linear_delete(lh, keys[i]);
     }
-    end = get_time_ms();
+    end = get_time_ms(); // End timing
     result.linear_ms = end - start;
     
     // Benchmark Cuckoo deletions
-    start = get_time_ms();
+    start = get_time_ms(); // Start timing
     for (int i = 0; i < n; i++) {
         cuckoo_delete(cu, keys[i]);
     }
-    end = get_time_ms();
+    end = get_time_ms(); // End timing
     result.cuckoo_ms = end - start;
     
     chained_destroy(ch);
@@ -151,7 +161,7 @@ BenchmarkResult benchmark_deletion(int *keys, int n, size_t capacity) {
 // Compare memory usage across implementations
 void benchmark_memory(int n, size_t capacity) {
     print_section_header("MEMORY USAGE");
-    
+    // Generate keys
     int *keys = generate_random_keys(n);
     
     // Create and fill all maps
@@ -159,6 +169,7 @@ void benchmark_memory(int n, size_t capacity) {
     LinearHashMap *lh = linear_create(capacity);
     CuckooHashMap *cu = cuckoo_create(capacity);
     
+    // Insert all keys
     for (int i = 0; i < n; i++) {
         chained_put(ch, keys[i], i);
         linear_put(lh, keys[i], i);
@@ -166,6 +177,7 @@ void benchmark_memory(int n, size_t capacity) {
     }
     
     // Report memory usage and structure-specific metrics
+    // e.g., max chain length for chained
     printf("Elements stored: %d\n\n", n);
     printf("Chained:        %zu bytes (max chain: %d)\n", 
            chained_memory_usage(ch), chained_max_chain_length(ch));
@@ -174,7 +186,7 @@ void benchmark_memory(int n, size_t capacity) {
     printf("Cuckoo:         %zu bytes (load: %.2f%%)\n", 
            cuckoo_memory_usage(cu), cuckoo_load_factor(cu) * 100);
     
-    chained_destroy(ch);
+    chained_destroy(ch); 
     linear_destroy(lh);
     cuckoo_destroy(cu);
     free(keys);
@@ -191,6 +203,7 @@ void benchmark_worst_case_lookup(int n, size_t capacity) {
     LinearHashMap *lh = linear_create(capacity);
     CuckooHashMap *cu = cuckoo_create(capacity);
     
+    // Insert all keys
     for (int i = 0; i < n; i++) {
         chained_put(ch, keys[i], i);
         linear_put(lh, keys[i], i);

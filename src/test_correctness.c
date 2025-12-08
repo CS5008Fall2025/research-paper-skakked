@@ -14,37 +14,38 @@
 #include <stdlib.h>
 
 // Helper macro for test assertions
-#define TEST_ASSERT(result, condition) \
-    do { \
+// Increments total tests and passed tests if condition is true
+#define TEST_ASSERT(result, condition) \ 
+    do { \ 
         (result).total++; \
         if (condition) (result).passed++; \
     } while(0)
 
 // Test chained hash map basic operations
 TestResult test_chained_correctness(void) {
-    TestResult result = {0, 0};
+    TestResult result = {0, 0}; // Initialize test result
     int val;
     
     printf("Testing Chained HashMap...\n");
-    ChainedHashMap *map = chained_create(100);
+    ChainedHashMap *map = chained_create(100); // Create map with capacity 100
     
     // Test 1: Insert and retrieve
-    chained_put(map, 42, 100);
+    chained_put(map, 42, 100); // Insert key 42 with value 100
     TEST_ASSERT(result, chained_get(map, 42, &val) && val == 100);
     
     // Test 2: Update existing key
-    chained_put(map, 42, 200);
+    chained_put(map, 42, 200); // Update key 42 with new value 200
     TEST_ASSERT(result, chained_get(map, 42, &val) && val == 200);
     
     // Test 3: Delete key
-    chained_delete(map, 42);
+    chained_delete(map, 42); // Delete key 42
     TEST_ASSERT(result, !chained_get(map, 42, &val));
     
     // Test 4: Miss on non-existent key
     TEST_ASSERT(result, !chained_get(map, 999, &val));
     
     // Test 5: Multiple inserts
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 50; i++) { // Insert keys 0-49
         chained_put(map, i, i * 10);
     }
     TEST_ASSERT(result, chained_size(map) == 50);
@@ -226,7 +227,7 @@ TestResult test_cuckoo_stress(int n) {
     TEST_ASSERT(result, cuckoo_size(map) <= (size_t)n);
     
     // Verify all keys retrievable
-    int val;
+    int val; // Temporary variable for retrieved value
     int found = 0;
     for (int i = 0; i < n; i++) {
         if (cuckoo_get(map, keys[i], &val)) found++;
@@ -253,25 +254,25 @@ TestResult run_all_correctness_tests(void) {
     // Basic tests
     r = test_chained_correctness();
     total.passed += r.passed; total.total += r.total;
-    
+    // Linear probing tests
     r = test_linear_correctness();
     total.passed += r.passed; total.total += r.total;
-    
+    // Cuckoo tests
     r = test_cuckoo_correctness();
     total.passed += r.passed; total.total += r.total;
     
     // Stress tests
     print_subsection("Stress Tests");
-    
+    // Define default test size
     r = test_chained_stress(DEFAULT_TEST_SIZE);
     total.passed += r.passed; total.total += r.total;
-    
+    // Linear probing stress test
     r = test_linear_stress(DEFAULT_TEST_SIZE);
     total.passed += r.passed; total.total += r.total;
-    
+    // Cuckoo stress test
     r = test_cuckoo_stress(DEFAULT_TEST_SIZE);
     total.passed += r.passed; total.total += r.total;
-    
+    // Summary
     printf("\nTotal: %d/%d correctness tests passed\n", total.passed, total.total);
     return total;
 }

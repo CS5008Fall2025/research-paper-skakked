@@ -31,7 +31,7 @@ int* generate_sequential_keys(int n) {
     int *keys = malloc(n * sizeof(int));
     if (!keys) return NULL;  // Handle allocation failure
     
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) { // Sequential integers
         keys[i] = i;
     }
     return keys;

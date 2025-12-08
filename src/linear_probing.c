@@ -62,7 +62,8 @@ bool linear_put(LinearHashMap *map, int key, int value) {
     size_t start = idx;                      // Remember start to detect full loop
     
     do {
-        // Found empty or deleted slot - insert here
+        // Found empty or deleted slot
+        // Insert new key-value
         if (map->entries[idx].state == EMPTY || 
             map->entries[idx].state == DELETED) {
             map->entries[idx].key = key;
@@ -71,7 +72,8 @@ bool linear_put(LinearHashMap *map, int key, int value) {
             map->size++;
             return true;
         }
-        // Found existing key - update value
+        // Found existing key
+        // Update value
         if (map->entries[idx].state == OCCUPIED && 
             map->entries[idx].key == key) {
             map->entries[idx].value = value;
@@ -102,14 +104,17 @@ bool linear_get(LinearHashMap *map, int key, int *value) {
             if (value) *value = map->entries[idx].value;
             return true;
         }
-        // Continue probing (skip DELETED slots)
+        // Continue probing
+        // Linear probe
+        // Move to next slot
         idx = (idx + 1) % map->capacity;
     } while (idx != start);
     
     return false;  // Not found
 }
 
-// Delete a key (mark as DELETED tombstone)
+// Delete a key
+// Marks the slot as DELETED
 bool linear_delete(LinearHashMap *map, int key) {
     if (!map) return false;
     
@@ -154,7 +159,7 @@ int linear_probe_count(LinearHashMap *map, int key) {
     
     size_t idx = hash(key, map->capacity);
     size_t start = idx;
-    int probes = 0;
+    int probes = 0; // Probe counter
     
     do {
         probes++;  // Count this probe
@@ -167,8 +172,8 @@ int linear_probe_count(LinearHashMap *map, int key) {
             map->entries[idx].key == key) {
             return probes;
         }
-        idx = (idx + 1) % map->capacity;
-    } while (idx != start);
+        idx = (idx + 1) % map->capacity; // Next slot
+    } while (idx != start); // Full loop
     
     return probes;  // Searched entire table
 }
