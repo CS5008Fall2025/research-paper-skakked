@@ -4,11 +4,10 @@
 * Semester: Fall 2025
 * Topic: Cuckoo Hashing: A Hash Table with Worst-Case Constant Lookup Time
 
-Note the following is an example outline to help you. Please rework as you need, you do not need to follow the section heads and *YOU SHOULD NOT* make everything a bulleted list. This needs to read as an executive report/research paper. 
 
 ## Introduction
 
-Cuckoo hashing is a hash table that achieves $O(1)$ worst-case lookup by giving each key two possible addresses instead of one. Unlike traditional hash tables where collisions can create long chains, cuckoo hashing guarantees that any key can be found by checking at most two locations. The name is derived from brood parasitism, a behavior in which a cuckoo chick pushes other eggs or young out of the nest upon hatching. Analogously, inserting a new key into a cuckoo hash table may push an older key to a different location [1].A key is stored in one of its two possible locations, so lookup simply checks both. Unlike traditional hash tables where collisions can create long chains, cuckoo hashing guarantees that any key can be found by checking at most two locations. 
+Cuckoo hashing is a hash table that achieves $O(1)$ worst-case lookup by giving each key two possible addresses instead of one. Unlike traditional hash tables where collisions can create long chains, cuckoo hashing guarantees that any key can be found by checking at most two locations. The name is derived from brood parasitism, a behavior in which a cuckoo chick pushes other eggs or young out of the nest upon hatching. Analogously, inserting a new key into a cuckoo hash table may push an older key to a different location [1].A key is stored in one of its two possible locations, so lookup simply checks both. Unlike traditional hash tables where collisions can create long chains, cuckoo hashing guarantees that any key can be found by checking at most two locations.[1]
 
 Cuckoo hashing was introduced by Rasmus Pagh and Flemming Friche Rodler in 2001 at the European Symposium on Algorithms, with the full paper published in the Journal of Algorithms in 2004 [1]. The authors developed this data structure to provide a practical dictionary with worst-case constant lookup time, matching the theoretical performance of dynamic perfect hashing [2] while being significantly simpler to implement. The original paper established key theoretical results including the requirement that load factor remain below approximately 50%, and that the expected number of displacements during insertion is constant. The work was recognized with the ESA Test-of-Time Award in 2020, acknowledging its significant impact on both theoretical computer science and practical systems design. Since its introduction, numerous variants have been developed, including d-ary cuckoo hashing which uses more than two hash functions to achieve higher load factors [3], and the recent "bubble-up" technique by Kuszmaul and Mitzenmacher which optimizes insertion performance [4].
 
@@ -352,3 +351,15 @@ Several aspects of the implementation required careful attention:
 The analysis of cuckoo hashing demonstrated that its theoretical guarantees translate clearly into measurable practical behavior. The structure’s defining property is that there are two possible homes per key. It proved effective in ensuring strictly bounded lookup time, which remained constant across all tested table sizes. In contrast, both chained hashing and linear probing showed increasing worst case behavior as the number of elements grew, with longer chains and probe sequences emerging even at moderate load factors. The empirical experiments confirmed that all three hash table designs deliver close to linear scaling for insertions and lookups under a fixed load factor, but they differ significantly in constant factors. Linear probing emerged as the fastest in terms of throughput due to its strong cache locality, while cuckoo hashing incurred higher insertion costs because of displacement chains and occasional rehashing. Despite this overhead, cuckoo hashing maintained competitive lookup performance and was the only structure that provided true worst case \(O(1)\) lookup behavior.
 
 Through building the implementation from scratch in C, the project highlighted complexity that underlies cuckoo hashing. Managing displacement chains, avoiding infinite loops, designing robust hash functions, and implementing rehashing safely required far more care than simpler strategies like chaining or linear probing. Overall, the project strengthened understanding of how algorithmic guarantees interact with hardware behavior, memory layout, and real world workloads, and it demonstrated why cuckoo hashing continues to influence modern system design.
+
+
+## References 
+[1] Pagh, R. and Rodler, F. F. 2004. Cuckoo hashing. Journal of Algorithms 51, 2 (2004), 122–144. DOI:https://doi.org/10.1016/j.jalgor.2003.12.002
+
+[2] Martin Dietzfelbinger, Anna Karlin, Kurt Mehlhorn, Friedhelm Meyer auf der Heide, Hans Rohnert, and Robert Endre Tarjan. 1994. Dynamic perfect hashing – upper and lower bounds. SIAM Journal on Computing 23, 4 (1994), 738–761. DOI:10.1137/S0097539791194094.
+
+[3] Dimitris Fotakis, Rasmus Pagh, Peter Sanders, and Paul Spirakis. 2005. Space efficient hash tables with worst case constant access time. Theory of Computing Systems 38, 2 (2005), 229–248. DOI:10.1007/s00224-004-1195-x
+
+[4] William Kuszmaul and Michael Mitzenmacher. 2025. Efficient d-ary cuckoo hashing at high load factors by bubbling up. In Proceedings of the 2025 ACM–SIAM Symposium on Discrete Algorithms (SODA 2025). Society for Industrial and Applied Mathematics.
+
+[5]
