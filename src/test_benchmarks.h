@@ -5,8 +5,8 @@
  * Class: CS 5008
  */
 
-#ifndef TEST_BENCHMARKS_H
-#define TEST_BENCHMARKS_H
+#ifndef TEST_BENCHMARKS_H // Include guard
+#define TEST_BENCHMARKS_H // Prevent multiple inclusions
 
 #include <stddef.h>
 
@@ -16,7 +16,7 @@ typedef struct {
     double linear_ms;
     double cuckoo_ms;
     int cuckoo_rehashes;
-} BenchmarkResult;
+} BenchmarkResult; // Structure to hold benchmark results
 
 // Run all benchmarks with specified parameters
 void run_all_benchmarks(int test_size, size_t capacity);

@@ -5,8 +5,8 @@
  * Class: CS 5008
  */
 
-#ifndef TEST_CORRECTNESS_H
-#define TEST_CORRECTNESS_H
+#ifndef TEST_CORRECTNESS_H // Include guard
+#define TEST_CORRECTNESS_H // Prevent multiple inclusions
 
 #include <stdbool.h>
 
@@ -14,7 +14,7 @@
 typedef struct {
     int passed;
     int total;
-} TestResult;
+} TestResult; // Structure to hold test results
 
 // Run all correctness tests, returns combined results
 TestResult run_all_correctness_tests(void);

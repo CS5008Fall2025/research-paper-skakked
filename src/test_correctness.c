@@ -179,7 +179,7 @@ TestResult test_chained_stress(int n) {
     chained_destroy(map);
     free(keys);
     printf("  Stress: %d/%d tests passed\n", result.passed, result.total);
-    return result;
+    return result; // Return test results
 }
 
 // Stress test linear probing hash map with n elements

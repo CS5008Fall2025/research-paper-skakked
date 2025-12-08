@@ -6,7 +6,7 @@
  */
 
 #ifndef CHAINED_H // Include guard
-#define CHAINED_H 
+#define CHAINED_H  // Prevent multiple inclusions
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -16,14 +16,14 @@ typedef struct ChainedNode {
     int key;                    // Key stored in this node
     int value;                  // Value associated with key
     struct ChainedNode *next;   // Pointer to next node in chain
-} ChainedNode;
+} ChainedNode; // Linked list node
 
 // Main hash map structure
 typedef struct {
     ChainedNode **buckets;  // Array of pointers to linked list heads
     size_t capacity;        // Number of buckets
     size_t size;            // Number of key-value pairs stored
-} ChainedHashMap;
+} ChainedHashMap; // Main hash map structure
 
 ChainedHashMap* chained_create(size_t capacity); // Create a new chained hash map
 void chained_destroy(ChainedHashMap *map); // Destroy the hash map and free memory

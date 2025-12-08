@@ -5,8 +5,8 @@
  * Class: CS 5008
  */
 
-#ifndef LINEAR_PROBING_H
-#define LINEAR_PROBING_H
+#ifndef LINEAR_PROBING_H // Include guard
+#define LINEAR_PROBING_H // Prevent multiple inclusions
 
 #include <stdbool.h>
 #include <stddef.h>

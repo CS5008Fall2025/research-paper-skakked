@@ -38,5 +38,4 @@ size_t cuckoo_size(CuckooHashMap *map); // Get number of elements in map
 size_t cuckoo_memory_usage(CuckooHashMap *map); // Get total memory usage in bytes
 int cuckoo_rehash_count(CuckooHashMap *map); // Get number of rehashes performed
 double cuckoo_load_factor(CuckooHashMap *map); // Get current load factor
-
 #endif

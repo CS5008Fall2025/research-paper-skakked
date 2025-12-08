@@ -5,8 +5,8 @@
  * Class: CS 5008
  */
 
-#ifndef TEST_UTILS_H
-#define TEST_UTILS_H
+#ifndef TEST_UTILS_H // Include guard
+#define TEST_UTILS_H // Prevent multiple inclusions
 
 #include <stddef.h>
 
