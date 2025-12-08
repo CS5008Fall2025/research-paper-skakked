@@ -276,14 +276,13 @@ bool cuckoo_insert_internal(CuckooHashMap *map, int key, int value, bool count_s
     return false;
 }
 ```
+Each step picks a table, computes the index, and either places the key in an empty slot or evicts the current occupant and continues with that key. `MAX_DISPLACEMENTS` (set to 500) limits the chain length. If this limit is reached, insertion fails and triggers a rehash.
 
-On each step the algorithm chooses a table, computes the corresponding index, and either places the key into an empty slot or evicts the existing resident and continues with that evicted key. The `MAX_DISPLACEMENTS` constant (set to 500) bounds the length of the displacement chain. If this limit is reached the insertion is treated as failed and a rehash is triggered.
-
-Lookup and deletion are straightforward in comparison. Both operations compute `h1` and `h2` for the key and inspect at most two positions. Deletion simply clears the `occupied` flag for any matching entry and decrements `size`.
+Lookup and deletion are simpler—both compute `h1` and `h2` and check at most two slots. Deletion clears the `occupied` flag and decrements `size`.
 
 #### Rehashing Strategy
 
-When a cycle is detected the map regenerates its hash function seeds and reinserts all elements into freshly allocated tables. The rehash logic looks like this:
+When a cycle is detected, the map generates new hash seeds and reinserts all elements into fresh tables:
 
 ```c
 static bool cuckoo_rehash(CuckooHashMap *map) {
@@ -330,17 +329,11 @@ static bool cuckoo_rehash(CuckooHashMap *map) {
 }
 ```
 
-Rehashing keeps the same capacity in this implementation because the experiments already control load factor separately. In a production setting the rehash could also grow the table when the load factor becomes too high.
+This implementation keeps the same capacity since the experiments control load factor separately.
 
 ### Implementation Challenges
 
-Several aspects of the implementation required careful attention:
-
-* **Managing two tables and hash seeds:** Keeping `table1`, `table2`, `seed1`, and `seed2` in sync across insertions, deletions, and rehashes is easy to get wrong. Small mistakes in index calculations or seed initialization tend to show up as hard to debug missing keys.
-* **Choosing `MAX_DISPLACEMENTS`:** There is a trade off between allowing enough displacements to resolve most insertions without rehashing and avoiding long cycles that hurt latency. The value 500 worked well in practice for the tested sizes and load factors.
-* **Memory management:** Rehashing allocates new tables and must correctly free the old ones after all entries have been moved. The code needs to handle allocation failures gracefully and avoid memory leaks when rehashing or destroying the map.
-* **Fair benchmarking:** To compare chained hashing, linear probing, and cuckoo hashing fairly, the test harness had to ensure that all implementations used the same hash function family, capacities, and workloads. Encapsulating timing and key generation in `test_utils.c` helped keep these details consistent across experiments.
-
+Several parts of the implementation were challenging. Managing two tables and hash seeds (`table1`, `table2`, `seed1`, `seed2`) across insertions, deletions, and rehashes was finicky and mistakes or oversight in index calculations or seed initialization often caused missing keys. Choosing `MAX_DISPLACEMENTS` involves a trade-off between allowing for a large enough amount of displacements to avoid rehashing. 500 worked well for my testing. Memory management and allocation failures caused a lot of issues and was extremely challenging.
 
 ## Summary
 
@@ -384,4 +377,3 @@ Through building the implementation from scratch in C, the project highlighted c
 
 [17] Austin Appleby. 2008. MurmurHash. https://github.com/aappleby/smhasher
 
-[18]
